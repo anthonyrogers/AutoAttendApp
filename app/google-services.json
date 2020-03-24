@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "157657838869",
+    "firebase_url": "https://autoattendanceapp-2a8ac.firebaseio.com",
+    "project_id": "autoattendanceapp-2a8ac",
+    "storage_bucket": "autoattendanceapp-2a8ac.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:157657838869:android:c7db2bd7d9a1337e14251c",
+        "android_client_info": {
+          "package_name": "com.example.autoattendapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "157657838869-438jd36bcj1gcf5jcdmh2lo9t1mkluk8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxM8F0JIE1RxcbJQ1BqHHx6wX7fackcuI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "157657838869-438jd36bcj1gcf5jcdmh2lo9t1mkluk8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
