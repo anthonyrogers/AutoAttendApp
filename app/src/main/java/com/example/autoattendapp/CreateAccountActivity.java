@@ -31,25 +31,50 @@ public class CreateAccountActivity extends AppCompatActivity {
         lastname = findViewById(R.id.lastNameTxtBox);
         email = findViewById(R.id.emailTxtBox);
         password = findViewById(R.id.passwordTxtBox);
+
         student = findViewById(R.id.registerStudentBtn);
         professor = findViewById(R.id.registerProfBtn);
+
         fAuth = FirebaseAuth.getInstance();
 
         student.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 String firstName = firstname.getText().toString().trim();
                 String lastName = lastname.getText().toString().trim();
-                String ema = email.getText().toString().trim();
-                String pass = password.getText().toString().trim();
+                String userEmail = email.getText().toString().trim();
+                String userPass = password.getText().toString().trim();
 
-                fAuth.createUserWithEmailAndPassword(ema,pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                if(firstName == null || firstName.length() == 0){
+                    Toast.makeText(getApplicationContext(), "Please enter your first name", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if(lastName == null || lastName.length() == 0) {
+                    Toast.makeText(getApplicationContext(), "Please enter your last name", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if(userEmail == null || userEmail.length() == 0) {
+                    Toast.makeText(getApplicationContext(), "Please enter an email", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if(userPass == null || userPass.length() == 0) {
+                    Toast.makeText(getApplicationContext(), "Please enter a password", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                fAuth.createUserWithEmailAndPassword(userEmail,userPass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Toast.makeText(CreateAccountActivity.this, "account created for student", Toast.LENGTH_SHORT).show();
+                        if(task.isSuccessful()) {
+                            Toast.makeText(getApplicationContext(), "Succesfully registered", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Failed to register user", Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
             }
         });
     }
+
 }
