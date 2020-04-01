@@ -11,20 +11,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+//import com.google.firebase.auth.AuthResult;
+//import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
 //NOTE: I created a gmail account for firebase so anyone can go in to it to
     // to create tables or edit firebase in the future. The login is as follows:
     // AutoAttendanceApp1@gmail.com
     // pass: Mobile123!
+    private final String TAG = "MainActivity ===>";
 
-
-    private FirebaseAuth mAuth;
+    //private FirebaseAuth mAuth;
 
     private Button createAccount;
     private Button loginButton;
@@ -32,18 +35,13 @@ public class MainActivity extends AppCompatActivity {
     EditText email;
     EditText password;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         //grabs instance of authentication
-        mAuth = FirebaseAuth.getInstance();
-
-        //grabs instance of databases
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        //mAuth = FirebaseAuth.getInstance();
 
         // launch create account activity when user presses register
         createAccount = findViewById(R.id.createAccount);
@@ -78,8 +76,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Please enter your password", Toast.LENGTH_LONG).show();
                     return;
                 }
-                System.out.println(userEmail + " " + userPass);
-                // try to authenticate the user
+                Log.d(TAG,userEmail + " " + userPass);
+                /*/ try to authenticate the user
                 mAuth.signInWithEmailAndPassword(userEmail, userPass)
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
@@ -87,15 +85,64 @@ public class MainActivity extends AppCompatActivity {
 
                                 // check if user was successfully authenticated
                                 if(task.isSuccessful()){
+                                    Log.d(TAG, "User successfully authenticated");
                                     Toast.makeText(getApplicationContext(), "User successfully authenticated", Toast.LENGTH_LONG).show();
                                 } else {
+                                    Log.d(TAG, "Failed to authenticate user");
                                     Toast.makeText(getApplicationContext(), "Failed to authenticate user", Toast.LENGTH_LONG).show();
                                 }
                             }
                         });
+                */
+                FirebaseFirestore database = MyGlobal.getInstance().gDB;
+                CollectionReference usersRef = database.collection("users");
+                database.collection("users")
+                        .whereEqualTo("email",userEmail)
+                        .whereEqualTo("password",userPass)
+                        .get()
+                        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot documentSnapshots) {
+                                String firstName="", lastName="", userEmail="", userPass="";
+                                int usertype = 0;
+                                int count =0;
+                                for (QueryDocumentSnapshot snap : documentSnapshots) {
+                                    count += 1;
+                                    Log.d(TAG, snap.getId() + " => " + snap.getData());
+                                    firstName = snap.getData().get("firstname").toString();
+                                    lastName = snap.getData().get("lastname").toString();
+                                    userEmail = snap.getData().get("email").toString();
+                                    userPass = snap.getData().get("password").toString();
+                                    usertype = Integer.parseInt( snap.getData().get("usertype").toString());
+                                }
+                                if(count > 0){
+                                    Intent intent;
+                                    if(usertype == 0){
+                                        MyGlobal.getInstance().gUser = new Student(firstName, lastName, userEmail, userPass);
+                                        intent = new Intent(MainActivity.this, StudentActivity.class);
+                                    }
+                                    else
+                                    {
+                                        MyGlobal.getInstance().gUser = new Teacher(firstName, lastName, userEmail, userPass);
+                                        intent = new Intent(MainActivity.this, TeacherActivity.class);
+                                    }
+                                    finish();
+                                    startActivity(intent);
+                                }
+                                else
+                                    Toast.makeText(getApplicationContext(), "Failed to authenticate user", Toast.LENGTH_LONG).show();
+
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Failed to authenticate user", e);
+                                Toast.makeText(getApplicationContext(), "Failed to connect server.", Toast.LENGTH_LONG).show();
+                            }
+                        });
+
             }
         });
-
-
     }
 }

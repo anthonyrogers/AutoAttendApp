@@ -3,20 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".StudentActivity">
+    tools:context=".TeacherActivity">
 
     <FrameLayout
-        android:id="@+id/studentFrame"
+        android:id="@+id/teacherFrame"
+        android:layout_weight="1"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="0dp">
 
     </FrameLayout>
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/textView2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Student UI" />
+        android:text="Teacher UI" />
 </LinearLayout>
