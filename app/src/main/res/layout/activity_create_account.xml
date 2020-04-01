@@ -10,7 +10,7 @@
         android:id="@+id/firstNameTxtBox"
         android:layout_width="355dp"
         android:layout_height="49dp"
-        android:layout_marginTop="68dp"
+        android:layout_marginTop="50dp"
         android:ems="10"
         android:hint="first name"
         android:inputType="textPersonName"
@@ -22,66 +22,55 @@
         android:id="@+id/lastNameTxtBox"
         android:layout_width="355dp"
         android:layout_height="49dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="124dp"
         android:ems="10"
         android:hint="last name"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/firstNameTxtBox" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/emailTxtBox"
         android:layout_width="351dp"
         android:layout_height="51dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="28dp"
+        android:layout_marginTop="200dp"
         android:ems="10"
         android:hint="temple email"
         android:inputType="textEmailAddress"
-        app:layout_constraintBottom_toTopOf="@+id/passwordTxtBox"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lastNameTxtBox" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/passwordTxtBox"
         android:layout_width="350dp"
         android:layout_height="50dp"
-        android:layout_marginStart="28dp"
-        android:layout_marginEnd="33dp"
-        android:layout_marginBottom="356dp"
+        android:layout_marginTop="280dp"
         android:ems="10"
         android:hint="password"
         android:inputType="textPassword"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/registerProfBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="276dp"
+        android:layout_marginTop="360dp"
+        android:layout_marginEnd="30dp"
         android:text="Register Professor"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.525"
-        app:layout_constraintStart_toEndOf="@+id/registerStudentBtn"
-        app:layout_constraintTop_toBottomOf="@+id/passwordTxtBox" />
-
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
     <Button
         android:id="@+id/registerStudentBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginBottom="276dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="360dp"
         android:text="Register Student"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/passwordTxtBox"
-        app:layout_constraintVertical_bias="1.0" />
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>
