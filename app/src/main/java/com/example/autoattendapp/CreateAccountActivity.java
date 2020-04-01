@@ -123,18 +123,19 @@ public class CreateAccountActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
                         String firstName = firstname.getText().toString().trim();
                         String lastName = lastname.getText().toString().trim();
                         String userEmail = email.getText().toString().trim();
                         String userPass = password.getText().toString().trim();
+                        String id = documentReference.getId();
+                        //Log.d(TAG, "user id: "+id);
                         Intent intent;
                         if (mIsStudent){
-                            MyGlobal.getInstance().gUser = new Student(firstName, lastName, userEmail, userPass);
+                            MyGlobal.getInstance().gUser = new Student(id, firstName, lastName, userEmail, userPass);
                             intent = new Intent(CreateAccountActivity.this, StudentActivity.class);
                         }
                         else {
-                            MyGlobal.getInstance().gUser = new Teacher(firstName, lastName, userEmail, userPass);
+                            MyGlobal.getInstance().gUser = new Teacher(id, firstName, lastName, userEmail, userPass);
                             intent = new Intent(CreateAccountActivity.this, TeacherActivity.class);
                         }
                         LoginInfo loginInfo = MyGlobal.getInstance().gLoginInfo;
