@@ -7,15 +7,16 @@ import java.util.ArrayList;
 
 public class User implements Parcelable {
 
+    private String ID;
     private String firstName;
     private String lastName;
     private String email;
     private String password;
-    private String ID;
     private ArrayList<Course> courses;
     private Beacon beacon;
 
-    public User(String firstName, String lastName, String email, String password){
+    public User(String id,String firstName, String lastName, String email, String password){
+        this.ID = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -33,6 +34,7 @@ public class User implements Parcelable {
     }*/
 
     protected User(Parcel in) {
+        ID = in.readString();
         firstName = in.readString();
         lastName = in.readString();
         email = in.readString();
@@ -44,6 +46,7 @@ public class User implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(ID);
         dest.writeString(firstName);
         dest.writeString(lastName);
         dest.writeString(email);

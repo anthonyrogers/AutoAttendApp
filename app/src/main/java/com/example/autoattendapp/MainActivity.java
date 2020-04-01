@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot documentSnapshots) {
-                        String firstName = "", lastName = "", userEmail = "", userPass = "";
+                        String firstName = "", lastName = "", userEmail = "", userPass = "", id="";
                         int usertype = 0;
                         int count = 0;
                         for (QueryDocumentSnapshot snap : documentSnapshots) {
@@ -178,14 +178,19 @@ public class MainActivity extends AppCompatActivity {
                             userEmail = snap.getData().get("email").toString();
                             userPass = snap.getData().get("password").toString();
                             usertype = Integer.parseInt(snap.getData().get("usertype").toString());
+                            id = snap.getId();
+                            Log.d(TAG, "user id: "+id);
+                            break;
                         }
-                        if (count > 0) {
+                        if (count > 0) {    //create user
                             Intent intent;
                             if (usertype == 0) {
-                                MyGlobal.getInstance().gUser = new Student(firstName, lastName, userEmail, userPass);
+                                MyGlobal.getInstance().gUser = new Student(id, firstName, lastName, userEmail, userPass);
+                                MyGlobal.getInstance().gUser.setID(id);
                                 intent = new Intent(MainActivity.this, StudentActivity.class);
+
                             } else {
-                                MyGlobal.getInstance().gUser = new Teacher(firstName, lastName, userEmail, userPass);
+                                MyGlobal.getInstance().gUser = new Teacher(id, firstName, lastName, userEmail, userPass);
                                 intent = new Intent(MainActivity.this, TeacherActivity.class);
                             }
                             // if email or password changed, save them to file
