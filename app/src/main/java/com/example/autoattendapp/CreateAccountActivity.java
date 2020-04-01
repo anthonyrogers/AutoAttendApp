@@ -3,6 +3,7 @@ package com.example.autoattendapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.nfc.Tag;
 import android.os.Bundle;
@@ -22,6 +23,9 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +35,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     Button student, professor;
     //FirebaseAuth fAuth;
     boolean mIsStudent;
-    private final String TAG = "MainActivity ===>";
+    private final String TAG = "CreateAccountActivity ===>";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,6 +137,12 @@ public class CreateAccountActivity extends AppCompatActivity {
                             MyGlobal.getInstance().gUser = new Teacher(firstName, lastName, userEmail, userPass);
                             intent = new Intent(CreateAccountActivity.this, TeacherActivity.class);
                         }
+                        LoginInfo loginInfo = MyGlobal.getInstance().gLoginInfo;
+                        try {
+                            saveLoginInfoToFile();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                         finish();
                         startActivity(intent);
 
@@ -149,4 +159,18 @@ public class CreateAccountActivity extends AppCompatActivity {
 
     }
 
+    private void saveLoginInfoToFile() throws IOException {
+        Context context = getApplicationContext();
+        FileOutputStream fos = context.openFileOutput("loginInfo", Context.MODE_PRIVATE);
+        ObjectOutputStream os = new ObjectOutputStream(fos);
+
+        LoginInfo loginInfo = MyGlobal.getInstance().gLoginInfo;
+        loginInfo.setEmail(email.getText().toString());
+        loginInfo.setPassword(password.getText().toString());
+
+        os.writeObject(loginInfo);
+        os.close();
+        fos.close();
+        Log.d(TAG, "saved Login info to file.\n");
+    }
 }
