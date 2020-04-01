@@ -20,7 +20,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 //import com.google.firebase.auth.AuthResult;
 //import com.google.firebase.auth.FirebaseAuth;
 
-
 public class MainActivity extends AppCompatActivity {
 //NOTE: I created a gmail account for firebase so anyone can go in to it to
     // to create tables or edit firebase in the future. The login is as follows:

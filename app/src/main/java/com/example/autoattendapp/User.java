@@ -29,6 +29,7 @@ public class User implements Parcelable {
         this.ID = ID;
         this.courses = courses;
         this.beacon = beacon;
+
     }*/
 
     protected User(Parcel in) {
@@ -77,6 +78,7 @@ public class User implements Parcelable {
     public String getID() {
         return ID;
     }
+
     public void setID(String id){this.ID = id;}
 
     public String getEmail() {
@@ -92,6 +94,7 @@ public class User implements Parcelable {
     public ArrayList<Course> getCourses() {
         return courses;
     }
+
     public void setCourses(ArrayList<Course> courses){this.courses = courses;}
 
     public Beacon getBeacon() { return beacon; }
