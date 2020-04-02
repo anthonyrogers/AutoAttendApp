@@ -50,8 +50,6 @@ public class CreateAccountActivity extends AppCompatActivity {
         student = findViewById(R.id.registerStudentBtn);
         professor = findViewById(R.id.registerProfBtn);
 
-        //fAuth = FirebaseAuth.getInstance();
-
         student.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,7 +102,6 @@ public class CreateAccountActivity extends AppCompatActivity {
         });*/
         //User user = new User(firstName, lastName, userEmail, userPass);
         FirebaseFirestore database = MyGlobal.getInstance().gDB;
-        CollectionReference citiesRef = database.collection("users");
 
         // Create a new user
         Map<String, Object> mapUser = new HashMap<>();

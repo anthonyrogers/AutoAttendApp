@@ -28,12 +28,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+/*
+    NOTE: I created a gmail account for firebase so anyone can go in to it to
+    to create tables or edit firebase in the future. The login is as follows:
+    AutoAttendanceApp1@gmail.com
+    pass: Mobile123!
 
+    Testing:
+    Teacher User: (Usertype: 1)
+    Email: tuf001@temple.edu
+    Password: 123456
+
+    Student User: (Usertype: 0)
+    Email: Your temple email
+    Password: 123456
+*/
 public class MainActivity extends AppCompatActivity {
-//NOTE: I created a gmail account for firebase so anyone can go in to it to
-    // to create tables or edit firebase in the future. The login is as follows:
-    // AutoAttendanceApp1@gmail.com
-    // pass: Mobile123!
 
     private final String TAG = "MainActivity ===>";
 
@@ -159,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, userEmail + " " + userPass);
         // try to access database's table: users
         FirebaseFirestore database = MyGlobal.getInstance().gDB;
-        CollectionReference usersRef = database.collection("users");
+        //CollectionReference usersRef = database.collection("users");
         database.collection("users")
                 .whereEqualTo("email", userEmail)
                 .whereEqualTo("password", userPass)
