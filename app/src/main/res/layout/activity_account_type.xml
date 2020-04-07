@@ -7,7 +7,7 @@
     tools:context=".AccountType">
 
     <ImageView
-        android:id="@+id/imageView7"
+        android:id="@+id/studentAccPic"
         android:layout_width="146dp"
         android:layout_height="0dp"
         android:layout_marginTop="140dp"
@@ -27,14 +27,14 @@
         android:text="Student Account"
         android:textSize="25sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/imageView8"
+        app:layout_constraintBottom_toTopOf="@+id/teacherAccPic"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.484"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView7" />
+        app:layout_constraintTop_toBottomOf="@+id/studentAccPic" />
 
     <ImageView
-        android:id="@+id/imageView8"
+        android:id="@+id/teacherAccPic"
         android:layout_width="139dp"
         android:layout_height="0dp"
         android:layout_marginBottom="5dp"
@@ -55,5 +55,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView8" />
+        app:layout_constraintTop_toBottomOf="@+id/teacherAccPic" />
 </androidx.constraintlayout.widget.ConstraintLayout>
