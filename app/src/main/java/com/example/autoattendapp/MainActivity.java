@@ -146,9 +146,9 @@ public class MainActivity extends AppCompatActivity {
 
     // go to register activity
     private void register(){
-        Intent createAccountIntent = new Intent(MainActivity.this, CreateAccountActivity.class);
+        Intent accountType = new Intent(MainActivity.this, AccountType.class);
         finish();
-        startActivity(createAccountIntent);
+        startActivity(accountType);
     }
 
     // when login button

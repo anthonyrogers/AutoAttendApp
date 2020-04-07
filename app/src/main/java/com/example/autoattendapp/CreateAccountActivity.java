@@ -153,8 +153,6 @@ public class CreateAccountActivity extends AppCompatActivity {
                         Log.w(TAG, "Error adding document", e);
                     }
                 });
-
-
     }
 
     private void saveLoginInfoToFile() throws IOException {
