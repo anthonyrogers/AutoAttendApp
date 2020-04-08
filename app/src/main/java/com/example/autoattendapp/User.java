@@ -28,7 +28,6 @@ public class User implements Parcelable {
         this.ID = ID;
         this.courses = courses;
         this.beacon = beacon;
-
     }*/
 
     protected User(Parcel in) {

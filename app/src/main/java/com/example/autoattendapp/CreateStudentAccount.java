@@ -3,36 +3,27 @@ package com.example.autoattendapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.nfc.Tag;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 //import com.google.firebase.auth.AuthResult;
 //import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateAccountActivity extends AppCompatActivity {
+public class CreateStudentAccount extends AppCompatActivity {
 
     EditText firstname, lastname, email, password, TUID;
     Button student;
@@ -43,7 +34,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_account);
+        setContentView(R.layout.activity_create_stuent_account);
 
         TUID = findViewById(R.id.TUIDtxtBox);
         firstname = findViewById(R.id.firstNameTxtBox);
@@ -117,12 +108,12 @@ public class CreateAccountActivity extends AppCompatActivity {
                     database.collection("users").document(fAuth.getUid()).set(mapUser).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            Intent intent = new Intent(CreateAccountActivity.this, StudentActivity.class);
+                            Intent intent = new Intent(CreateStudentAccount.this, StudentActivity.class);
                             finish();
                             startActivity(intent);
                         }
                     });
-                         
+
                     Toast.makeText(getApplicationContext(), "Succesfully registered", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getApplicationContext(), "Failed to register user", Toast.LENGTH_LONG).show();
