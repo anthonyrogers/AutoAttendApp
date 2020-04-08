@@ -23,6 +23,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -43,6 +44,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
     NOTE: I created a gmail account for firebase so anyone can go in to it to
@@ -64,14 +67,13 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private final String TAG = "MainActivity ===>";
 
     private LoginInfo mLoginInfo;
-
     private Button createAccount;
     private Button loginButton;
     private EditText email;
     private EditText password;
-
     BeaconManager mBeaconManager;
-
+    FirebaseAuth mAuth;
+    FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +91,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1234);
         }
-
 
         // email and password fields
         email = findViewById(R.id.emailTxtBox);
@@ -112,36 +113,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         createAccount.setEnabled(false);
         loginButton.setEnabled(false);
 
-        // try to authenticate the App
-        authenticateApp();
-
         // load the login info, user don't need to type again.
         readLoginInfoFromFile();
         email.setText(mLoginInfo.getEmail());
         password.setText(mLoginInfo.getPassword());
-
-
-    }
-
-    private void authenticateApp(){
-        FirebaseAuth firebaseAuth;
-        firebaseAuth = FirebaseAuth.getInstance();
-        firebaseAuth.signInWithEmailAndPassword("autoattendanceapp1@gmail.com", "MobileAutoAttendance123!")
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-
-                        // check if user was successfully authenticated
-                        if (task.isSuccessful()) {
-                            createAccount.setEnabled(true);
-                            loginButton.setEnabled(true);
-                            Log.d(TAG, "App successfully authenticated");
-                        } else {
-                            Log.d(TAG, "Failed to authenticate app");
-                            Toast.makeText(getApplicationContext(), "Failed to connect database", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
     }
 
     // read login info from file
@@ -201,8 +176,25 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
             return;
         }
         Log.d(TAG, userEmail + " " + userPass);
+
+        mAuth.signInWithEmailAndPassword(userEmail, userPass).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d(TAG, "createUserWithEmail:success");
+
+                    //will figure out which activity to redirect to after I do the create Account portion
+
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                    Toast.makeText(MainActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         // try to access database's table: users
-        FirebaseFirestore database = MyGlobal.getInstance().gDB;
+       /* FirebaseFirestore database = MyGlobal.getInstance().gDB;
         //CollectionReference usersRef = database.collection("users");
         database.collection("users")
                 .whereEqualTo("email", userEmail)
@@ -260,8 +252,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                         Toast.makeText(getApplicationContext(), "Failed to connect server.", Toast.LENGTH_LONG).show();
                     }
                 });
-    }
 
+        */
+    }
 
     //THE TWO OVERRIDE METHODS ARE FOR THE BEACON CONNECTION AND RESPONSE
     @Override
