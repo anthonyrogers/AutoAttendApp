@@ -3,6 +3,13 @@
     package="com.example.autoattendapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
+
+    <meta-data
+        android:name="com.google.android.nearby.messages.AIzaSyDWWj3RSpMUA_h6BDTBzeg58Tum-wMG-IU"
+        android:value="AIzaSyDWWj3RSpMUA_h6BDTBzeg58Tum-wMG-IU" />
 
     <application
         android:allowBackup="true"

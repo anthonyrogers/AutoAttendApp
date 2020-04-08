@@ -2,10 +2,15 @@ package com.example.autoattendapp;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -23,11 +28,22 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.altbeacon.beacon.Beacon;
+import org.altbeacon.beacon.BeaconConsumer;
+import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
+import org.altbeacon.beacon.Identifier;
+import org.altbeacon.beacon.RangeNotifier;
+import org.altbeacon.beacon.Region;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+
 /*
     NOTE: I created a gmail account for firebase so anyone can go in to it to
     to create tables or edit firebase in the future. The login is as follows:
@@ -43,7 +59,7 @@ import java.io.ObjectOutputStream;
     Email: Your temple email
     Password: 123456
 */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier {
 
     private final String TAG = "MainActivity ===>";
 
@@ -54,10 +70,26 @@ public class MainActivity extends AppCompatActivity {
     private EditText email;
     private EditText password;
 
+    BeaconManager mBeaconManager;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //calls 3rd party beacon sdk and starts the instance
+        mBeaconManager = BeaconManager.getInstanceForApplication(this);
+        mBeaconManager.getBeaconParsers().add(new BeaconParser().
+                setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
+        // Binds this activity to the BeaconService
+        mBeaconManager.bind(this);
+
+        //location is needed so this will check for permissions
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1234);
+        }
+
 
         // email and password fields
         email = findViewById(R.id.emailTxtBox);
@@ -87,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
         readLoginInfoFromFile();
         email.setText(mLoginInfo.getEmail());
         password.setText(mLoginInfo.getPassword());
+
+
     }
 
     private void authenticateApp(){
@@ -226,7 +260,33 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Failed to connect server.", Toast.LENGTH_LONG).show();
                     }
                 });
-
     }
 
+
+    //THE TWO OVERRIDE METHODS ARE FOR THE BEACON CONNECTION AND RESPONSE
+    @Override
+    public void onBeaconServiceConnect() {
+        // Encapsulates a beacon identifier of arbitrary byte length
+        ArrayList<Identifier> identifiers = new ArrayList<>();
+
+        // Set null to indicate that we want to match beacons with any value
+        identifiers.add(null);
+        // Represents a criteria of fields used to match beacon
+        Region region = new Region("BeaconID", identifiers);
+        try {
+            // Tells the BeaconService to start looking for beacons that match the passed Region object
+            mBeaconManager.startRangingBeaconsInRegion(region);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        // Specifies a class that should be called each time the BeaconService gets ranging data, once per second by default
+        mBeaconManager.addRangeNotifier(this);
+    }
+
+    @Override
+    public void didRangeBeaconsInRegion(Collection<Beacon> collection, Region region) {
+        if (collection.size() > 0) {
+            Log.i(TAG, collection.iterator().next().getIdentifier(0).toString());
+        }
+    }
 }
