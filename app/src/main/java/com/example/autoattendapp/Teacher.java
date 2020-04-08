@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 public class Teacher extends User implements Parcelable {
 
-    public Teacher(String id, String firstName, String lastName, String email, String password) {
-        super(id, firstName, lastName, email, password);
+    public Teacher(String id, String firstName, String lastName, String email) {
+        super(id, firstName, lastName, email);
     }
     /*
     public Teacher(String firstName, String lastName, String ID, ArrayList<Course> courses, Beacon beacon) {

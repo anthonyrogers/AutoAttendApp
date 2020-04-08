@@ -11,16 +11,14 @@ public class User implements Parcelable {
     private String firstName;
     private String lastName;
     private String email;
-    private String password;
     private ArrayList<Course> courses;
     private Beacon beacon;
 
-    public User(String id,String firstName, String lastName, String email, String password){
+    public User(String id,String firstName, String lastName, String email){
         this.ID = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.password = password;
     }
 
     /*
@@ -38,7 +36,6 @@ public class User implements Parcelable {
         firstName = in.readString();
         lastName = in.readString();
         email = in.readString();
-        password = in.readString();
         ID = in.readString();
         courses = in.readArrayList(Course.class.getClassLoader());
         beacon = in.readParcelable(Beacon.class.getClassLoader());
@@ -50,7 +47,6 @@ public class User implements Parcelable {
         dest.writeString(firstName);
         dest.writeString(lastName);
         dest.writeString(email);
-        dest.writeString(password);
         dest.writeString(ID);
         dest.writeList(courses);
         dest.writeParcelable(beacon, flags);
@@ -88,11 +84,6 @@ public class User implements Parcelable {
         return email;
     }
     public void setEmail(String email){this.email = email;}
-
-    public String getPassword() {
-        return password;
-    }
-    public void setPassword(String password){this.password = password;}
 
     public ArrayList<Course> getCourses() {
         return courses;

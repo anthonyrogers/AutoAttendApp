@@ -110,8 +110,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
             public void onClick(View v) {login(); }
         });
 
-        createAccount.setEnabled(false);
-        loginButton.setEnabled(false);
+        createAccount.setEnabled(true);
+        loginButton.setEnabled(true);
 
         // load the login info, user don't need to type again.
         readLoginInfoFromFile();
