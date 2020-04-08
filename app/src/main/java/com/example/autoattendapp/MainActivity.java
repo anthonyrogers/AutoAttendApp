@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
@@ -73,8 +75,24 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private EditText password;
     BeaconManager mBeaconManager;
     FirebaseAuth mAuth;
-    FirebaseFirestore db;
 
+    DBManager dbManager;
+
+    Handler loginHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            if(msg.arg1 == User.TEACHER) {
+                Intent teacherIntent = new Intent(MainActivity.this, TeacherActivity.class);
+                startActivity(teacherIntent);
+            } else if(msg.arg1 == User.STUDENT){
+                Intent studentIntent = new Intent(MainActivity.this, StudentActivity.class);
+                startActivity(studentIntent);
+            } else {
+                Log.d("Error", "Error? Handle.");
+            }
+            return false;
+        }
+    });
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +104,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                 setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
         // Binds this activity to the BeaconService
         mBeaconManager.bind(this);
+
+        dbManager = DBManager.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
         //location is needed so this will check for permissions
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -109,9 +130,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
             @Override
             public void onClick(View v) {login(); }
         });
-
-        createAccount.setEnabled(true);
-        loginButton.setEnabled(true);
 
         // load the login info, user don't need to type again.
         readLoginInfoFromFile();
@@ -162,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
     // when login button
     private void login(){
+
         // get the text in the fields
         String userEmail = email.getText().toString();
         String userPass = password.getText().toString();
@@ -175,85 +194,24 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
             Toast.makeText(getApplicationContext(), "Please enter your password", Toast.LENGTH_LONG).show();
             return;
         }
-        Log.d(TAG, userEmail + " " + userPass);
 
         mAuth.signInWithEmailAndPassword(userEmail, userPass).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    // Sign in success, update UI with the signed-in user's information
-                    Log.d(TAG, "createUserWithEmail:success");
-
-                    //will figure out which activity to redirect to after I do the create Account portion
-
+                    try {
+                        saveLoginInfoToFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    dbManager.loadUser(loginHandler);
                 } else {
                     // If sign in fails, display a message to the user.
-                    Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                    Toast.makeText(MainActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                    Log.w(TAG, "signInWithEmailAndPassword:failure", task.getException());
+                    Toast.makeText(MainActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-        // try to access database's table: users
-       /* FirebaseFirestore database = MyGlobal.getInstance().gDB;
-        //CollectionReference usersRef = database.collection("users");
-        database.collection("users")
-                .whereEqualTo("email", userEmail)
-                .whereEqualTo("password", userPass)
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot documentSnapshots) {
-                        String firstName = "", lastName = "", userEmail = "", userPass = "", id="";
-                        int usertype = 0;
-                        int count = 0;
-                        for (QueryDocumentSnapshot snap : documentSnapshots) {
-                            count += 1;
-                            Log.d(TAG, snap.getId() + " => " + snap.getData());
-                            firstName = snap.getData().get("firstname").toString();
-                            lastName = snap.getData().get("lastname").toString();
-                            userEmail = snap.getData().get("email").toString();
-                            userPass = snap.getData().get("password").toString();
-                            usertype = Integer.parseInt(snap.getData().get("usertype").toString());
-                            id = snap.getId();
-                            Log.d(TAG, "user id: "+id);
-                            break;
-                        }
-                        if (count > 0) {    //create user
-                            Intent intent;
-                            if (usertype == 0) {
-                                MyGlobal.getInstance().gUser = new Student(id, firstName, lastName, userEmail, userPass);
-                                MyGlobal.getInstance().gUser.setID(id);
-                                intent = new Intent(MainActivity.this, StudentActivity.class);
-
-                            } else {
-                                MyGlobal.getInstance().gUser = new Teacher(id, firstName, lastName, userEmail, userPass);
-                                intent = new Intent(MainActivity.this, TeacherActivity.class);
-                            }
-                            // if email or password changed, save them to file
-                            if (!mLoginInfo.getEmail().equals(email.getText().toString()) ||
-                                    !mLoginInfo.getPassword().equals(password.getText().toString())) {
-                                try {
-                                    saveLoginInfoToFile();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            finish();
-                            startActivity(intent);
-                        } else
-                            Toast.makeText(getApplicationContext(), "Failed to authenticate user", Toast.LENGTH_LONG).show();
-
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Failed to authenticate user", e);
-                        Toast.makeText(getApplicationContext(), "Failed to connect server.", Toast.LENGTH_LONG).show();
-                    }
-                });
-
-        */
     }
 
     //THE TWO OVERRIDE METHODS ARE FOR THE BEACON CONNECTION AND RESPONSE

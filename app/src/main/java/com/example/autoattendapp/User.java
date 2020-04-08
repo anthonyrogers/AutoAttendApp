@@ -11,25 +11,22 @@ public class User implements Parcelable {
     private String firstName;
     private String lastName;
     private String email;
-    private ArrayList<Course> courses;
+    private ArrayList<String> courses;
     private Beacon beacon;
 
-    public User(String id,String firstName, String lastName, String email){
-        this.ID = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-    }
+    public static final int STUDENT = 0;
+    public static final int TEACHER = 1;
 
-    /*
-    public User(String firstName, String lastName, String ID, ArrayList<Course> courses, Beacon beacon) {
+
+
+    public User(String firstName, String lastName, String ID, String email, ArrayList<String> courses, Beacon beacon) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.ID = ID;
+        this.email = email;
         this.courses = courses;
         this.beacon = beacon;
-
-    }*/
+    }
 
     protected User(Parcel in) {
         ID = in.readString();
@@ -85,11 +82,11 @@ public class User implements Parcelable {
     }
     public void setEmail(String email){this.email = email;}
 
-    public ArrayList<Course> getCourses() {
+    public ArrayList<String> getCourses() {
         return courses;
     }
 
-    public void setCourses(ArrayList<Course> courses){this.courses = courses;}
+    public void setCourses(ArrayList<String> courses){this.courses = courses;}
 
     public Beacon getBeacon() { return beacon; }
     public void setBeacon(Beacon beacon){this.beacon = beacon;}
@@ -105,6 +102,13 @@ public class User implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public String toString() {
+        String ret = String.format("Name: %s %s\nID: %s",
+                firstName, lastName, ID);
+        return ret;
     }
 
 }
