@@ -3,9 +3,7 @@ package com.example.autoattendapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,25 +14,19 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 //import com.google.firebase.auth.AuthResult;
 //import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateAccountActivity extends AppCompatActivity {
+public class CreateStudentAccount extends AppCompatActivity {
 
     EditText firstname, lastname, email, password, TUID;
     Button student;
@@ -47,10 +39,10 @@ public class CreateAccountActivity extends AppCompatActivity {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
             if(msg.arg1 == User.TEACHER) {
-                Intent teacherIntent = new Intent(CreateAccountActivity.this, TeacherActivity.class);
+                Intent teacherIntent = new Intent(CreateStudentAccount.this, TeacherActivity.class);
                 startActivity(teacherIntent);
             } else if(msg.arg1 == User.STUDENT){
-                Intent studentIntent = new Intent(CreateAccountActivity.this, StudentActivity.class);
+                Intent studentIntent = new Intent(CreateStudentAccount.this, StudentActivity.class);
                 startActivity(studentIntent);
             } else {
                 Log.d("Error", "Error? Handle.");
@@ -62,8 +54,8 @@ public class CreateAccountActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_account);
         dbManager = DBManager.getInstance();
+        setContentView(R.layout.activity_create_stuent_account);
 
         TUID = findViewById(R.id.TUIDtxtBox);
         firstname = findViewById(R.id.firstNameTxtBox);
