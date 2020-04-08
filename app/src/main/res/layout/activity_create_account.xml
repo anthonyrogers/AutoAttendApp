@@ -8,78 +8,102 @@
 
     <EditText
         android:id="@+id/firstNameTxtBox"
-        android:layout_width="355dp"
-        android:layout_height="49dp"
-        android:layout_marginTop="68dp"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginBottom="31dp"
         android:ems="10"
         android:hint="first name"
         android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/lastNameTxtBox"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/TUIDtxtBox" />
 
     <EditText
         android:id="@+id/lastNameTxtBox"
-        android:layout_width="355dp"
-        android:layout_height="49dp"
-        android:layout_marginTop="24dp"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginBottom="32dp"
         android:ems="10"
         android:hint="last name"
         android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/emailTxtBox"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/firstNameTxtBox" />
 
     <EditText
+        android:id="@+id/passwordTxtBox"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginBottom="32dp"
+        android:ems="10"
+        android:hint="password"
+        android:inputType="textPassword"
+        app:layout_constraintBottom_toTopOf="@+id/registerStudBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/emailTxtBox" />
+
+    <Button
+        android:id="@+id/registerStudBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="137dp"
+        android:text="Register"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/passwordTxtBox" />
+
+    <EditText
         android:id="@+id/emailTxtBox"
-        android:layout_width="351dp"
-        android:layout_height="51dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="28dp"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="32dp"
         android:ems="10"
         android:hint="temple email"
         android:inputType="textEmailAddress"
         app:layout_constraintBottom_toTopOf="@+id/passwordTxtBox"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lastNameTxtBox" />
 
     <EditText
-        android:id="@+id/passwordTxtBox"
-        android:layout_width="350dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="28dp"
-        android:layout_marginEnd="33dp"
-        android:layout_marginBottom="356dp"
+        android:id="@+id/TUIDtxtBox"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginBottom="32dp"
         android:ems="10"
-        android:hint="password"
-        android:inputType="textPassword"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:hint="TUID"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/firstNameTxtBox"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/registerProfBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="276dp"
-        android:text="Register Professor"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.525"
-        app:layout_constraintStart_toEndOf="@+id/registerStudentBtn" />
-
-    <Button
-        android:id="@+id/registerStudentBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginBottom="276dp"
-        android:text="Register Student"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/passwordTxtBox"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="77dp"
+        android:layout_marginBottom="45dp"
+        android:text="Student Registration"
+        android:textSize="30sp"
+        android:textStyle="normal|bold"
+        app:layout_constraintBottom_toTopOf="@+id/TUIDtxtBox"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
