@@ -6,6 +6,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -75,8 +76,15 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private EditText password;
     BeaconManager mBeaconManager;
     FirebaseAuth mAuth;
-
     DBManager dbManager;
+
+    Intent mServiceIntent;
+    private ServiceForBeacon mBeaconService;
+    Context ctx;
+    public Context getCtx() {
+        return ctx;
+    }
+
 
     Handler loginHandler = new Handler(new Handler.Callback() {
         @Override
@@ -97,6 +105,17 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Code for the Beacon Service
+        ctx  =this;
+        mBeaconService = new ServiceForBeacon(getCtx());
+        mServiceIntent = new Intent(getCtx(), mBeaconService.getClass());
+
+
+        if (!isMyServiceRunning(mBeaconService.getClass())) {
+          //  startService(mServiceIntent);
+        }
+
 
         //calls 3rd party beacon sdk and starts the instance
         mBeaconManager = BeaconManager.getInstanceForApplication(this);
@@ -135,6 +154,25 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         readLoginInfoFromFile();
         email.setText(mLoginInfo.getEmail());
         password.setText(mLoginInfo.getPassword());
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopService(mServiceIntent);
+        Log.i("MAINACT", "onDestroy!");
+        super.onDestroy();
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                Log.i ("isMyServiceRunning?", true+"");
+                return true;
+            }
+        }
+        Log.i ("isMyServiceRunning?", false+"");
+        return false;
     }
 
     // read login info from file
