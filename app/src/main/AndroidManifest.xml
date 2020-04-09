@@ -18,23 +18,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".StudentMeetingActivity"></activity>
+
         <service
             android:name=".ServiceForBeacon"
             android:enabled="true"
-            android:exported="false"></service>
+            android:exported="false" />
 
         <receiver
-            android:name="com.example.autoattendapp.BeaconRestarterBroadcastReceiver"
+            android:name=".BeaconRestarterBroadcastReceiver"
             android:enabled="true"
-            android:exported="false"
-           >
-        </receiver>
+            android:exported="false"></receiver>
 
         <activity android:name=".AccountType" />
         <activity
             android:name=".AddClassActivity"
             android:label="@string/title_activity_add_class"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".AddClassContent" />
         <activity android:name=".AccountType" />
         <activity android:name=".StudentActivity" />
