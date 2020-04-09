@@ -26,8 +26,9 @@ public class SecondFragment extends Fragment {
         view.findViewById(R.id.button_second).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(SecondFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_FirstFragment);
+                //you pushed code to main and this was failing so i just commented it out for now
+             //   NavHostFragment.findNavController(SecondFragment.this)
+              //          .navigate(R.id.action_SecondFragment_to_FirstFragment);
             }
         });
     }
