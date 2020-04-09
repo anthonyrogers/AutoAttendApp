@@ -212,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     // go to register activity
     private void register(){
         Intent accountType = new Intent(MainActivity.this, AccountType.class);
+        //Intent accountType = new Intent(MainActivity.this, AddClassContent.class);
         finish();
         startActivity(accountType);
     }

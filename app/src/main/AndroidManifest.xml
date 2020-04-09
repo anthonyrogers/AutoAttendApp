@@ -31,6 +31,12 @@
         </receiver>
 
         <activity android:name=".AccountType" />
+        <activity
+            android:name=".AddClassActivity"
+            android:label="@string/title_activity_add_class"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".AddClassContent" />
+        <activity android:name=".AccountType" />
         <activity android:name=".StudentActivity" />
         <activity android:name=".TeacherActivity" />
         <activity android:name=".CreateStudentAccount" />
