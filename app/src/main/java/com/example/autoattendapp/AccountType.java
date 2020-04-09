@@ -11,13 +11,10 @@ public class AccountType extends AppCompatActivity  {
 
     ImageView student, teacher;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account_type);
-
-
 
         student = findViewById(R.id.studentAccPic);
         teacher = findViewById(R.id.teacherAccPic);
@@ -33,7 +30,8 @@ public class AccountType extends AppCompatActivity  {
         teacher.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent createAcc = new Intent(AccountType.this, CreateTeacherAccount.class);
+                startActivity(createAcc);
             }
         });
     }
