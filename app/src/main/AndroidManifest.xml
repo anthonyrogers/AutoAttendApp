@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <meta-data
         android:name="com.google.android.nearby.messages.AIzaSyDWWj3RSpMUA_h6BDTBzeg58Tum-wMG-IU"
@@ -19,7 +19,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".StudentMeetingActivity"></activity>
+        <activity android:name=".StudentAddClassActivity"></activity>
+        <activity android:name=".StudentMeetingActivity" />
 
         <service
             android:name=".ServiceForBeacon"
