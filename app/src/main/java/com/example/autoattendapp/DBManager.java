@@ -145,7 +145,7 @@ public class DBManager {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                String classID = document.getString("class");
+                                String classID = document.getId();
                                 Log.d("ClassID", classID);
                                 addStudentToClass(classID, context);
                             }
