@@ -15,4 +15,9 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="duration">Duration:</string>
+    <string name="time_in">Time in:</string>
+    <string name="classroom">Classroom:</string>
+    <string name="time_out">Time out:</string>
+    <string name="attended">Attended:</string>
 </resources>

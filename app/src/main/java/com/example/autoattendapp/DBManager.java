@@ -27,6 +27,16 @@ public class DBManager {
     public static DBManager dbManager = null;
     FirebaseFirestore database;
 
+
+    // define User db variables
+    public final static String DOC_USERS = "users";
+    public final static String FIRSTNAME = "firstname";
+    public final static String LASTNAME = "lastname";
+    public final static String EMAIL = "email";
+    public final static String USERTYPE = "usertype";
+    public final static String CLASSES = "classes";
+    public final static String BEACON = "beacon";
+
     private DBManager() {
         database = MyGlobal.getInstance().gDB;
     }
@@ -44,40 +54,40 @@ public class DBManager {
 
     public void addStudent(String authID, String firstName, String lastName, String email) {
         Map<String, Object> docMap = new HashMap<>();
-        docMap.put("firstname", firstName);
-        docMap.put("lastname", lastName);
-        docMap.put("email", email);
-        docMap.put("usertype", User.STUDENT);
-        docMap.put("classes", new ArrayList<String>());
-        database.collection("users").document(authID).set(docMap);
+        docMap.put(FIRSTNAME, firstName);
+        docMap.put(LASTNAME, lastName);
+        docMap.put(EMAIL, email);
+        docMap.put(USERTYPE, User.STUDENT);
+        docMap.put(CLASSES, new ArrayList<String>());
+        database.collection(DOC_USERS).document(authID).set(docMap);
     }
 
     public void addTeacher(String authID, String firstName, String lastName, String email, String beaconID) {
         Map<String, Object> docMap = new HashMap<>();
-        docMap.put("firstname", firstName);
-        docMap.put("lastname", lastName);
-        docMap.put("email", email);
-        docMap.put("usertype", User.TEACHER);
-        docMap.put("classes", new ArrayList<String>());
-        docMap.put("beacon", beaconID);
-        database.collection("users").document(authID).set(docMap);
+        docMap.put(FIRSTNAME, firstName);
+        docMap.put(LASTNAME, lastName);
+        docMap.put(EMAIL, email);
+        docMap.put(USERTYPE, User.TEACHER);
+        docMap.put(CLASSES, new ArrayList<String>());
+        docMap.put(BEACON, beaconID);
+        database.collection(DOC_USERS).document(authID).set(docMap);
     }
 
     public void loadUser(final Handler handler) {
-        database.collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+        database.collection(DOC_USERS).document(FirebaseAuth.getInstance().getCurrentUser().getUid())
         .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful()) {
-                    String firstName = task.getResult().getString("firstname");
-                    String lastName = task.getResult().getString("lastname");
-                    String email = task.getResult().getString("email");
-                    int userType = task.getResult().getLong("usertype").intValue();
-                    ArrayList<String> classIDs = (ArrayList<String>) task.getResult().get("classes");
+                    String firstName = task.getResult().getString(FIRSTNAME);
+                    String lastName = task.getResult().getString(LASTNAME);
+                    String email = task.getResult().getString(EMAIL);
+                    int userType = task.getResult().getLong(USERTYPE).intValue();
+                    ArrayList<String> classIDs = (ArrayList<String>) task.getResult().get(CLASSES);
                     String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     Message msg = Message.obtain();
                     if(userType == User.TEACHER) {
-                        String beaconID = task.getResult().getString("beacon");
+                        String beaconID = task.getResult().getString(BEACON);
                         Account.setTeacherAccount(new Teacher(firstName, lastName, userID, email, classIDs, new Beacon(beaconID)));
                     } else {
                         Account.setStudentAccount(new Student(firstName, lastName, userID, email, classIDs));
