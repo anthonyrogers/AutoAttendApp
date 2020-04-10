@@ -17,6 +17,7 @@ public class StudentMeetingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_meeting);
+        setTitle("Meeting");
 
         //TODO change to meeting info from database
         roomText.setText("100");

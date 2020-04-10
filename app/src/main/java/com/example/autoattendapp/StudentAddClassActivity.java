@@ -3,6 +3,7 @@ package com.example.autoattendapp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,7 +30,9 @@ public class StudentAddClassActivity extends AppCompatActivity {
                 if(code.equals("")) {
                     Toast.makeText(StudentAddClassActivity.this, "Please enter class code", Toast.LENGTH_SHORT).show();
                 } else {
-                    //TODO: check for class code in class database and if found, add to users courses using DBmanager
+                    DBManager dbManager = DBManager.getInstance();
+                    dbManager.checkClassCode(code, StudentAddClassActivity.this.getApplicationContext());
+
                 }
             }
         });

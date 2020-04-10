@@ -1,7 +1,10 @@
 package com.example.autoattendapp;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -9,13 +12,20 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,6 +123,49 @@ public class DBManager {
         docMap.put("")
         return classID;
     }*/
+
+    //check student class code, if class exists call addStudentToClass
+    public void checkClassCode(String classCode, final Context context) {
+        database.collection("classes")
+                .whereEqualTo("code", classCode)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String classID = document.getString("class");
+                                Log.d("ClassID", classID);
+                                addStudentToClass(classID, context);
+                            }
+                        } else {
+                            Log.d("ClassCodeError", "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+    }
+
+    public void addStudentToClass(String classID, final Context context) {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser != null) {
+            String userUid = firebaseUser.getUid();
+            DocumentReference userRef = database.collection("users").document(userUid);
+
+            userRef.update(
+                    "classes", Arrays.asList(classID)
+            ).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()) {
+                        Toast.makeText(context, "Class added", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(context, "Class not found", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    }
+
 
 
 }
