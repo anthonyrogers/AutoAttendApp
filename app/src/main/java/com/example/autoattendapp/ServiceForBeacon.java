@@ -53,7 +53,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        String input = intent.getStringExtra("inputExtra");
 
         mBeaconManager = BeaconManager.getInstanceForApplication(this);
         mBeaconManager.getBeaconParsers().add(new BeaconParser().
@@ -66,10 +65,10 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
                 0, notificationIntent, 0);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("You're currently in class")
-                .setContentText(input)
+                .setContentTitle("You're currently active in class")
+                .setContentText("This will dismiss when class is over")
                 .setContentIntent(pendingIntent)
-                .setSmallIcon(R.drawable.studentbutton)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
                 .build();
         startForeground(1, notification);
 
@@ -127,7 +126,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
 
             //Since you guys dont have the beacon to connect to i just stopped the service so it wouldn't run in the background
             //for now. will set a condition to stop based off class time
-            stopSelf();
+           // stopSelf();
         }
     }
 
