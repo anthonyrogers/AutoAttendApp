@@ -88,7 +88,7 @@ public class DBManager {
                     Message msg = Message.obtain();
                     if(userType == User.TEACHER) {
                         String beaconID = task.getResult().getString(BEACON);
-                        Account.setTeacherAccount(new Teacher(firstName, lastName, userID, email, classIDs, new Beacon(beaconID)));
+                        Account.setTeacherAccount(new Teacher(firstName, lastName, userID, email, classIDs, beaconID));
                     } else {
                         Account.setStudentAccount(new Student(firstName, lastName, userID, email, classIDs));
                     }

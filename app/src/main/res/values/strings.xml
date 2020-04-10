@@ -2,7 +2,7 @@
     <string name="app_name">Auto Attend</string>
     <color name="white">#FFFFFF</color>
     <color name="blue">#3C85C6</color>
-    
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_add_class">AddClassActivity</string>

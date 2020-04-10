@@ -107,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
         if (!isMyServiceRunning(ServiceForBeacon.class)) {
             Intent serviceIntent = new Intent(this, ServiceForBeacon.class);
             ContextCompat.startForegroundService(this, serviceIntent);
-
         }
 
         dbManager = DBManager.getInstance();

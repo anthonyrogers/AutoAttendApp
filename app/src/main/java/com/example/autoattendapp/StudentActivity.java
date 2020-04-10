@@ -15,10 +15,12 @@ import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
 
 public class StudentActivity extends AppCompatActivity {
 
+    DBManager dbManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student);
+        dbManager = DBManager.getInstance();
 
         //sets the title to user name
         Student student = Account.getStudentAccount();

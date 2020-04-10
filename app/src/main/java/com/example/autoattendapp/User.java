@@ -12,14 +12,14 @@ public class User implements Parcelable {
     private String lastName;
     private String email;
     private ArrayList<String> courses;
-    private Beacon beacon;
+    private String beacon;
 
     public static final int STUDENT = 0;
     public static final int TEACHER = 1;
 
 
 
-    public User(String firstName, String lastName, String ID, String email, ArrayList<String> courses, Beacon beacon) {
+    public User(String firstName, String lastName, String ID, String email, ArrayList<String> courses, String beacon) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.ID = ID;
@@ -35,7 +35,7 @@ public class User implements Parcelable {
         email = in.readString();
         ID = in.readString();
         courses = in.readArrayList(Course.class.getClassLoader());
-        beacon = in.readParcelable(Beacon.class.getClassLoader());
+        beacon = in.readString();
     }
 
     @Override
@@ -46,7 +46,7 @@ public class User implements Parcelable {
         dest.writeString(email);
         dest.writeString(ID);
         dest.writeList(courses);
-        dest.writeParcelable(beacon, flags);
+        dest.writeString(beacon);
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -88,8 +88,8 @@ public class User implements Parcelable {
 
     public void setCourses(ArrayList<String> courses){this.courses = courses;}
 
-    public Beacon getBeacon() { return beacon; }
-    public void setBeacon(Beacon beacon){this.beacon = beacon;}
+    public String getBeacon() { return beacon; }
+    public void setBeacon(String beacon){this.beacon = beacon;}
 
     @Override
     public boolean equals(Object user) {
