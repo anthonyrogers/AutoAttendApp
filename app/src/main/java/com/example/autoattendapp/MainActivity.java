@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -65,7 +66,7 @@ import java.util.Map;
     Email: Your temple email
     Password: 123456
 */
-public class MainActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier {
+public class MainActivity extends AppCompatActivity {
 
     private final String TAG = "MainActivity ===>";
 
@@ -74,16 +75,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private Button loginButton;
     private EditText email;
     private EditText password;
-    BeaconManager mBeaconManager;
     FirebaseAuth mAuth;
     DBManager dbManager;
-
     Intent mServiceIntent;
-    private ServiceForBeacon mBeaconService;
-    Context ctx;
-    public Context getCtx() {
-        return ctx;
-    }
 
 
     Handler loginHandler = new Handler(new Handler.Callback() {
@@ -107,22 +101,14 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         setContentView(R.layout.activity_main);
 
         //Code for the Beacon Service
-        ctx  =this;
-        mBeaconService = new ServiceForBeacon(getCtx());
-        mServiceIntent = new Intent(getCtx(), mBeaconService.getClass());
+        mServiceIntent = new Intent(this, ServiceForBeacon.class);
 
+        //Checks to see if service is running
+        if (!isMyServiceRunning(ServiceForBeacon.class)) {
+            Intent serviceIntent = new Intent(this, ServiceForBeacon.class);
+            ContextCompat.startForegroundService(this, serviceIntent);
 
-        if (!isMyServiceRunning(mBeaconService.getClass())) {
-          //  startService(mServiceIntent);
         }
-
-
-        //calls 3rd party beacon sdk and starts the instance
-        mBeaconManager = BeaconManager.getInstanceForApplication(this);
-        mBeaconManager.getBeaconParsers().add(new BeaconParser().
-                setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
-        // Binds this activity to the BeaconService
-        mBeaconManager.bind(this);
 
         dbManager = DBManager.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -158,8 +144,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
     @Override
     protected void onDestroy() {
-        stopService(mServiceIntent);
-        Log.i("MAINACT", "onDestroy!");
         super.onDestroy();
     }
 
@@ -251,32 +235,5 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                 }
             }
         });
-    }
-
-    //THE TWO OVERRIDE METHODS ARE FOR THE BEACON CONNECTION AND RESPONSE
-    @Override
-    public void onBeaconServiceConnect() {
-        // Encapsulates a beacon identifier of arbitrary byte length
-        ArrayList<Identifier> identifiers = new ArrayList<>();
-
-        // Set null to indicate that we want to match beacons with any value
-        identifiers.add(null);
-        // Represents a criteria of fields used to match beacon
-        Region region = new Region("BeaconID", identifiers);
-        try {
-            // Tells the BeaconService to start looking for beacons that match the passed Region object
-            mBeaconManager.startRangingBeaconsInRegion(region);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-        // Specifies a class that should be called each time the BeaconService gets ranging data, once per second by default
-        mBeaconManager.addRangeNotifier(this);
-    }
-
-    @Override
-    public void didRangeBeaconsInRegion(Collection<Beacon> collection, Region region) {
-        if (collection.size() > 0) {
-            Log.i(TAG, collection.iterator().next().getIdentifier(0).toString());
-        }
     }
 }
