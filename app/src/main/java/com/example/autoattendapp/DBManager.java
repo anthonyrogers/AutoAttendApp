@@ -13,20 +13,14 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.Source;
 
-import java.time.DayOfWeek;
-import java.time.LocalTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +40,7 @@ public class DBManager {
     public final static String USERTYPE = "usertype";
     public final static String CLASSES = "classes";
     public final static String BEACON = "beacon";
+    private List<String> classes;
 
     private DBManager() {
         database = MyGlobal.getInstance().gDB;
@@ -124,6 +119,22 @@ public class DBManager {
         return classID;
     }*/
 
+    public void getClassList() {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser != null) {
+            String userUid = firebaseUser.getUid();
+            DocumentReference userRef = database.collection("users").document(userUid);
+            userRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    classes = (List<String>) documentSnapshot.get("classes");
+                    Log.d("class", classes.get(0));
+                }
+            });
+        }
+    }
+
+
     //check student class code, if class exists call addStudentToClass
     public void checkClassCode(String classCode, final Context context) {
         database.collection("classes")
@@ -150,9 +161,8 @@ public class DBManager {
         if(firebaseUser != null) {
             String userUid = firebaseUser.getUid();
             DocumentReference userRef = database.collection("users").document(userUid);
-
             userRef.update(
-                    "classes", Arrays.asList(classID)
+                    "classes", FieldValue.arrayUnion(classID)
             ).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
