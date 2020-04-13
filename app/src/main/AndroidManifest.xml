@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <meta-data
         android:name="com.google.android.nearby.messages.AIzaSyDWWj3RSpMUA_h6BDTBzeg58Tum-wMG-IU"
@@ -13,20 +14,29 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".StudentAddClassActivity"></activity>
+        <activity android:name=".StudentMeetingActivity" />
+
+        <service
+            android:name=".ServiceForBeacon"
+            android:enabled="true"
+            android:exported="false" />
+
+        <activity android:name=".AccountType" />
         <activity
             android:name=".AddClassActivity"
             android:label="@string/title_activity_add_class"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".AddClassContent" />
-        <activity android:name=".AccountType" />
         <activity android:name=".StudentActivity" />
         <activity android:name=".TeacherActivity" />
-        <activity android:name=".CreateAccountActivity" />
+        <activity android:name=".CreateStudentAccount" />
+        <activity android:name=".CreateTeacherAccount" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

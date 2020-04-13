@@ -3,10 +3,10 @@ package com.example.autoattendapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.nfc.Tag;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,37 +21,49 @@ import com.google.android.gms.tasks.Task;
 //import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateAccountActivity extends AppCompatActivity {
+public class CreateStudentAccount extends AppCompatActivity {
 
     EditText firstname, lastname, email, password, TUID;
     Button student;
-    ArrayList<Course> courses;
     FirebaseAuth fAuth;
+    DBManager dbManager;
     private final String TAG = "CreateAccountActivity ===>";
+
+    Handler loginHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            if(msg.arg1 == User.TEACHER) {
+                Intent teacherIntent = new Intent(CreateStudentAccount.this, TeacherActivity.class);
+                startActivity(teacherIntent);
+            } else if(msg.arg1 == User.STUDENT){
+                Intent studentIntent = new Intent(CreateStudentAccount.this, StudentActivity.class);
+                startActivity(studentIntent);
+            } else {
+                Log.d("Error", "Error? Handle.");
+            }
+            return false;
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_account);
+        dbManager = DBManager.getInstance();
+        setContentView(R.layout.activity_create_stuent_account);
 
         TUID = findViewById(R.id.TUIDtxtBox);
         firstname = findViewById(R.id.firstNameTxtBox);
         lastname = findViewById(R.id.lastNameTxtBox);
         email = findViewById(R.id.emailTxtBox);
         password = findViewById(R.id.passwordTxtBox);
-        student = findViewById(R.id.registerStudBtn);
-        courses = new ArrayList<>();
+        student = findViewById(R.id.registerStudentBtn);
 
         fAuth = FirebaseAuth.getInstance();
         student.setOnClickListener(new View.OnClickListener() {
@@ -64,9 +76,9 @@ public class CreateAccountActivity extends AppCompatActivity {
 
     private void addNewUser() {
         String tuid = TUID.getText().toString().trim();
-        String firstName = firstname.getText().toString().trim();
-        String lastName = lastname.getText().toString().trim();
-        String userEmail = email.getText().toString().trim();
+        final String firstName = firstname.getText().toString().trim();
+        final String lastName = lastname.getText().toString().trim();
+        final String userEmail = email.getText().toString().trim();
         String userPass = password.getText().toString().trim();
 
         if(firstName == null || firstName.length() == 0){
@@ -94,41 +106,19 @@ public class CreateAccountActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()) {
-                    String tuid = TUID.getText().toString().trim();
-                    String firstName = firstname.getText().toString().trim();
-                    String lastName = lastname.getText().toString().trim();
-                    String userEmail = email.getText().toString().trim();
-                    String userPass = password.getText().toString().trim();
-                    ArrayList<Course> courses = new ArrayList<>();
-                    Beacon beacon = new Beacon("");
-                    // Create a new user
-                    Map<String, Object> mapUser = new HashMap<>();
-                    mapUser.put("ID", tuid);
-                    mapUser.put("firstname", firstName);
-                    mapUser.put("lastname", lastName);
-                    mapUser.put("email", userEmail);
-                    mapUser.put("password", userPass);
-                    mapUser.put("courses", courses);
-                    mapUser.put("beacon", beacon);
-
-                    //User user = new User(firstName, lastName, userEmail, userPass);
-                    FirebaseFirestore database = MyGlobal.getInstance().gDB;
-                    // Add a new document with a generated ID
-                    database.collection("users").document(fAuth.getUid()).set(mapUser).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Intent intent = new Intent(CreateAccountActivity.this, StudentActivity.class);
-                            finish();
-                            startActivity(intent);
-                        }
-                    });
-                         
-                    Toast.makeText(getApplicationContext(), "Succesfully registered", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Failed to register user", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Successfully Registered", Toast.LENGTH_LONG).show();
+                    dbManager.addStudent(fAuth.getUid(), firstName, lastName, userEmail);
+                    dbManager.loadUser(loginHandler);
                 }
             }
-        });
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if(e instanceof FirebaseAuthUserCollisionException){
+                    Toast.makeText(getApplicationContext(), "Failed: Email already exists", Toast.LENGTH_LONG).show();
+                }
+            }
+        });;
 
 
     }
