@@ -30,6 +30,8 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
     TimePickerDialog mTimePickerDlg;
 
     private Button mAddClassgBtn;
+    private EditText mCourseEText;
+    private EditText mClassromEText;
     private EditText mStartDayEText;
     private EditText mEndDayEText;
 
@@ -45,6 +47,12 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
     private EditText etStartTime5;
     private EditText etEndTime5;
 
+    private Spinner spinWeekDay1;
+    private Spinner spinWeekDay2;
+    private Spinner spinWeekDay3;
+    private Spinner spinWeekDay4;
+    private Spinner spinWeekDay5;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,11 +67,13 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
         mEndDayEText.setFocusable(false);
         mEndDayEText.setClickable(true);
 
-        Spinner spinWeekDay1 = findViewById(R.id.spinWeekDay1);
-        Spinner spinWeekDay2 = findViewById(R.id.spinWeekDay2);
-        Spinner spinWeekDay3 = findViewById(R.id.spinWeekDay3);
-        Spinner spinWeekDay4 = findViewById(R.id.spinWeekDay4);
-        Spinner spinWeekDay5 = findViewById(R.id.spinWeekDay5);
+        mCourseEText = findViewById(R.id.editTextCourse);
+        mClassromEText = findViewById(R.id.editTextLocation);
+        spinWeekDay1 = findViewById(R.id.spinWeekDay1);
+        spinWeekDay2 = findViewById(R.id.spinWeekDay2);
+        spinWeekDay3 = findViewById(R.id.spinWeekDay3);
+        spinWeekDay4 = findViewById(R.id.spinWeekDay4);
+        spinWeekDay5 = findViewById(R.id.spinWeekDay5);
         //spinWeekDay1.setOnItemSelectedListener(new ClassOnItemSelectedListener());
 
         iWhichTime = 0;
@@ -175,12 +185,64 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
         mAddClassgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                //        .setAction("Action", null).show();
+                addClass_onClick();
             }
         });
     }
 
+    private  void addClass_onClick(){
+        DBManager db = DBManager.getInstance();
+        ArrayList<MeetingOfClass> meetingList = new ArrayList<>();
+        MeetingOfClass meeting;
+        String weekday = spinWeekDay1.getSelectedItem().toString();
+        if(weekday.length() > 0) {
+            meeting = new MeetingOfClass();
+            meeting.weekday = weekday;
+            meeting.startTime = etStartTime1.getText().toString();
+            meeting.endTime = etEndTime1.getText().toString();
+            meetingList.add(meeting);
+        }
+        weekday = spinWeekDay2.getSelectedItem().toString();
+        if(weekday.length() > 0) {
+            meeting = new MeetingOfClass();
+            meeting.weekday = weekday;
+            meeting.startTime = etStartTime2.getText().toString();
+            meeting.endTime = etEndTime2.getText().toString();
+            meetingList.add(meeting);
+        }
+        weekday = spinWeekDay3.getSelectedItem().toString();
+        if(weekday.length() > 0) {
+            meeting = new MeetingOfClass();
+            meeting.weekday = weekday;
+            meeting.startTime = etStartTime3.getText().toString();
+            meeting.endTime = etEndTime3.getText().toString();
+            meetingList.add(meeting);
+        }
+        weekday = spinWeekDay4.getSelectedItem().toString();
+        if(weekday.length() > 0) {
+            meeting = new MeetingOfClass();
+            meeting.weekday = weekday;
+            meeting.startTime = etStartTime4.getText().toString();
+            meeting.endTime = etEndTime4.getText().toString();
+            meetingList.add(meeting);
+        }
+        weekday = spinWeekDay5.getSelectedItem().toString();
+        if(weekday.length() > 0) {
+            meeting = new MeetingOfClass();
+            meeting.weekday = weekday;
+            meeting.startTime = etStartTime5.getText().toString();
+            meeting.endTime = etEndTime5.getText().toString();
+            meetingList.add(meeting);
+        }
+        db.addClassToTeacher(mCourseEText.getText().toString(),
+                mClassromEText.getText().toString(),
+                mStartDayEText.getText().toString(),
+                mEndDayEText.getText().toString(),
+                meetingList);
+        finish();
+    }
     @Override
     public void onClick(View v) {
         final Calendar cldr = Calendar.getInstance();
