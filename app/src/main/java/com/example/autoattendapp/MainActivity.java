@@ -57,14 +57,6 @@ import java.util.Map;
     AutoAttendanceApp1@gmail.com
     pass: Mobile123!
 
-    Testing:
-    Teacher User: (Usertype: 1)
-    Email: tuf001@temple.edu
-    Password: 123456
-
-    Student User: (Usertype: 0)
-    Email: Your temple email
-    Password: 123456
 */
 public class MainActivity extends AppCompatActivity {
 
@@ -194,8 +186,7 @@ public class MainActivity extends AppCompatActivity {
 
     // go to register activity
     private void register(){
-        //Intent accountType = new Intent(MainActivity.this, AccountType.class);
-        Intent accountType = new Intent(MainActivity.this, AddClassContent.class);
+        Intent accountType = new Intent(MainActivity.this, AccountType.class);
         finish();
         startActivity(accountType);
     }
@@ -223,6 +214,9 @@ public class MainActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     try {
                         saveLoginInfoToFile();
+
+                        Intent AddClassContent = new Intent(MainActivity.this, AddClassContent.class);
+                        startActivity(AddClassContent);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

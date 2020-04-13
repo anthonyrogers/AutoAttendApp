@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -176,6 +177,64 @@ public class DBManager {
         }
     }
 
+    public void addClassToTeacher(String course, String classroom, String startDay, String endDay,
+                                  final ArrayList<MeetingOfClass> meetingList){
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser == null)
+            return;
+        String userUid = firebaseUser.getUid();
+        final Map<String, Object> mapClass = new HashMap<>();
+        mapClass.put("course", course);
+        mapClass.put("classroom", classroom);
+        mapClass.put("start_day", startDay);
+        mapClass.put("end_day", endDay);
+        //mapClass.put("meetings", meetingIDs);
 
+        // Add a new class
+        database.collection("classes")
+                .add(mapClass)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("addClassToTeacher ==>","added a class: "+documentReference.getId());
+                        for (int i=0; i< meetingList.size(); i++){
+                            addMeetingsToClass(documentReference.getId(),
+                                    meetingList.get(i).weekday,
+                                    meetingList.get(i).startTime,
+                                    meetingList.get(i).endTime);
+                        }
 
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("addClassToTeacher ==>", "Error: fail to adding class", e);
+                    }
+                });
+    }
+
+    private void addMeetingsToClass(String classId, String weekday, String starttime,String endtime){
+        ArrayList<String> meetingIDs = new ArrayList<String>();
+        Map<String, Object> mapMeeting = new HashMap<>();
+        mapMeeting.put("classId", classId);
+        mapMeeting.put("weekday", weekday);
+        mapMeeting.put("start_time", starttime);
+        mapMeeting.put("end_time", endtime);
+        database.collection("meetings")
+                .add(mapMeeting)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("addClassToTeacher ==>","added a mapMeeting.");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("addClassToTeacher ==>", "Error: fail to adding mapMeeting", e);
+                    }
+                });
+
+    }
 }
