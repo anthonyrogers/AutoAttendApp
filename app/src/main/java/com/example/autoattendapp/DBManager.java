@@ -177,12 +177,13 @@ public class DBManager {
         }
     }
 
+    // add a class to teacher account
     public void addClassToTeacher(String course, String classroom, String startDay, String endDay,
                                   final ArrayList<MeetingOfClass> meetingList){
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if(firebaseUser == null)
             return;
-        String userUid = firebaseUser.getUid();
+        final String userUid = firebaseUser.getUid();
         final Map<String, Object> mapClass = new HashMap<>();
         mapClass.put("course", course);
         mapClass.put("classroom", classroom);
@@ -204,6 +205,21 @@ public class DBManager {
                                     meetingList.get(i).endTime);
                         }
 
+                        DocumentReference userRef = database.collection("users").document(userUid);
+                        userRef.update(
+                                "classes", FieldValue.arrayUnion(documentReference.getId())
+                        ).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isSuccessful()) {
+                                    //Log.d("DBManager", "added class to user");
+                                } else {
+                                    Log.d("DBManager", "Error: fail to add class to user", task.getException());
+                                }
+                            }
+                        });
+
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -214,6 +230,7 @@ public class DBManager {
                 });
     }
 
+    // add a meeting to its class
     private void addMeetingsToClass(String classId, String weekday, String starttime,String endtime){
         ArrayList<String> meetingIDs = new ArrayList<String>();
         Map<String, Object> mapMeeting = new HashMap<>();
@@ -236,5 +253,37 @@ public class DBManager {
                     }
                 });
 
+    }
+
+    // return the class ids of user
+    public void getClassIdsOfUser(final CourseListActivity owner) {
+        database.collection(DOC_USERS).document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()) {
+                    ArrayList<String> classIDs = (ArrayList<String>) task.getResult().get(CLASSES);
+                    owner.loadClassIdsOfUser(true, classIDs);
+                } else {
+                    owner.loadClassIdsOfUser(false, null);
+                }
+            }
+        });
+    }
+
+    // return class info by class id
+    public void getClassInfoById(final CourseListActivity owner, final String id){
+        database.collection(CLASSES).document(id)
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()) {
+                    String name = task.getResult().getString("course");
+                    owner.getClassInfoById(true, id, name);
+                } else {
+                    owner.getClassInfoById(false, null, null);
+                }
+            }
+        });
     }
 }
