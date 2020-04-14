@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -135,7 +136,6 @@ public class DBManager {
         }
     }
 
-
     //check student class code, if class exists call addStudentToClass
     public void checkClassCode(String classCode, final Context context) {
         database.collection("classes")
@@ -255,7 +255,10 @@ public class DBManager {
 
     }
 
-    // return the class ids of user
+    /*
+     * for course list only ========================================================================
+     */
+    // get the class ids of user
     public void getClassIdsOfUser(final CourseListActivity owner) {
         database.collection(DOC_USERS).document(FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -271,7 +274,7 @@ public class DBManager {
         });
     }
 
-    // return class info by class id
+    // get class info by class id
     public void getClassInfoById(final CourseListActivity owner, final String id){
         database.collection(CLASSES).document(id)
                 .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -285,5 +288,59 @@ public class DBManager {
                 }
             }
         });
+    }
+
+    /*
+     * for viewing class only ========================================================================
+     */
+    // get class info by class id
+    public void getClassInfoById(final AddClassContent owner, final String id){
+        database.collection(CLASSES).document(id)
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()) {
+                    String name = task.getResult().getString("course");
+                    String classroom = task.getResult().getString("classroom");
+                    String start_day = task.getResult().getString("start_day");
+                    String end_day = task.getResult().getString("end_day");
+                    owner.getClassInfoFromDB(true, name, classroom, start_day, end_day);
+                } else {
+                    owner.getClassInfoFromDB(false,null, null, null, null);
+                }
+            }
+        });
+    }
+
+    // get meeting info by class id
+    public void getMeetingsOfClass(final AddClassContent owner, final String id){
+        FirebaseFirestore database = MyGlobal.getInstance().gDB;
+        database.collection("meetings")
+                .whereEqualTo("classId", id)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot documentSnapshots) {
+                        String weekday ="", startTime="", endTime="";
+                        List<AddClassContent.MeetingInfo> list = new ArrayList<AddClassContent.MeetingInfo>();
+                        AddClassContent.MeetingInfo meetingInfo;
+                        for (QueryDocumentSnapshot snap : documentSnapshots) {
+                            Log.d("Get meeting ====>", snap.getId() + " => " + snap.getData());
+                            weekday = snap.getData().get("weekday").toString();
+                            startTime = snap.getData().get("start_time").toString();
+                            endTime = snap.getData().get("end_time").toString();
+                            meetingInfo = new AddClassContent.MeetingInfo(weekday,startTime,endTime);
+                            list.add(meetingInfo);
+                        }
+                        owner.getMeetingInfoFromDB(true, list);
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        owner.getMeetingInfoFromDB(true, null);
+                    }
+                });
     }
 }

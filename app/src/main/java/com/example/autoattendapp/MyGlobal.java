@@ -6,7 +6,8 @@ public class MyGlobal {
     private static MyGlobal mInstance= null;
 
     public User gUser;
-    LoginInfo gLoginInfo;
+    public LoginInfo gLoginInfo;
+    public CourseListActivity courseListActivity;
     public FirebaseFirestore gDB = FirebaseFirestore.getInstance();;
 
     protected MyGlobal(){}

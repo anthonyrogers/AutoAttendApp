@@ -15,6 +15,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.PriorityQueue;
@@ -67,7 +68,8 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
     // click add class button
     private void AddClass(){
         if(mUserType.equals("Teacher")) {
-            Intent ClassContentIntent = new Intent(CourseListActivity.this, AddClassContent.class);
+            MyGlobal.getInstance().courseListActivity = this;
+            Intent ClassContentIntent = new Intent(this, AddClassContent.class);
             startActivity(ClassContentIntent);
         }
         else{
@@ -76,6 +78,13 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         }
     }
 
+    public void freshClassList(){
+        //Log.d("courseListActivity ==>", "freshClassList");
+        mClassQueue.clear();
+        db.getClassIdsOfUser(this);
+    }
+
+    // return class ids from DBManager
     public void loadClassIdsOfUser(boolean success, ArrayList<String> classlist){
         if(!success){
             Snackbar.make(getCurrentFocus(), "Fail to load classes of user", Snackbar.LENGTH_LONG)
@@ -91,6 +100,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         }
     }
 
+    // return class info from DBManager
     public void getClassInfoById(boolean success, String id, String name){
         if(!success) {
             Log.d("course list ==>", "class id: "+ id);
