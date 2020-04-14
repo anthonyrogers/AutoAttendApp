@@ -53,12 +53,23 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
     private Spinner spinWeekDay4;
     private Spinner spinWeekDay5;
 
+    private String mClassId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_add_class);
-        setTitle("Add Class");
+
         mAddClassgBtn = findViewById(R.id.addClassBtn);
+        if(getIntent().getExtras() == null)
+            setTitle("Add Class");
+        else {
+            setTitle("View Class");
+            mClassId = getIntent().getExtras().getString("classId");
+            mAddClassgBtn.setText("");
+            mAddClassgBtn.setEnabled(false);
+        }
+
         mStartDayEText = findViewById(R.id.editTextStartDay);
         mStartDayEText.setFocusable(false);
         mStartDayEText.setClickable(true);
@@ -193,6 +204,26 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
     }
 
     private  void addClass_onClick(){
+        if(mCourseEText.getText().toString().length()==0) {
+            Snackbar.make(getCurrentFocus(), "course name cannot be empty", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+            return;
+        }
+        if(mClassromEText.getText().toString().length()==0) {
+            Snackbar.make(getCurrentFocus(), "location cannot be empty", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            return;
+        }
+        if(mStartDayEText.getText().toString().length()==0) {
+            Snackbar.make(getCurrentFocus(), "start day cannot be empty", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            return;
+        }
+        if(mEndDayEText.getText().toString().length()==0) {
+            Snackbar.make(getCurrentFocus(), "end day cannot be empty", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            return;
+        }
         DBManager db = DBManager.getInstance();
         ArrayList<MeetingOfClass> meetingList = new ArrayList<>();
         MeetingOfClass meeting;
@@ -235,6 +266,11 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
             meeting.startTime = etStartTime5.getText().toString();
             meeting.endTime = etEndTime5.getText().toString();
             meetingList.add(meeting);
+        }
+        if(meetingList.size()==0) {
+            Snackbar.make(getCurrentFocus(), "meeting cannot be empty", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            return;
         }
         db.addClassToTeacher(mCourseEText.getText().toString(),
                 mClassromEText.getText().toString(),

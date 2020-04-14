@@ -14,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
@@ -76,10 +77,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
             if(msg.arg1 == User.TEACHER) {
-                Intent teacherIntent = new Intent(MainActivity.this, TeacherActivity.class);
+                //Intent teacherIntent = new Intent(MainActivity.this, TeacherActivity.class);
+                Intent teacherIntent = new Intent(MainActivity.this, CourseListActivity.class);
+                teacherIntent.putExtra("userType", "Teacher");
                 startActivity(teacherIntent);
             } else if(msg.arg1 == User.STUDENT){
-                Intent studentIntent = new Intent(MainActivity.this, StudentActivity.class);
+                Intent studentIntent = new Intent(MainActivity.this, CourseListActivity.class);
+                studentIntent.putExtra("userType", "Student");
                 startActivity(studentIntent);
             } else {
                 Log.d("Error", "Error? Handle.");
@@ -214,9 +218,6 @@ public class MainActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     try {
                         saveLoginInfoToFile();
-
-                        Intent AddClassContent = new Intent(MainActivity.this, AddClassContent.class);
-                        startActivity(AddClassContent);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
