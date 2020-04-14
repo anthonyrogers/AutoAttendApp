@@ -29,9 +29,8 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
     DatePickerDialog mDatePickerDlg;
     TimePickerDialog mTimePickerDlg;
 
-    private Button mAddClassgBtn;
     private EditText mCourseEText;
-    private EditText mClassromEText;
+    private EditText mClassroomEText;
     private EditText mStartDayEText;
     private EditText mEndDayEText;
 
@@ -54,20 +53,24 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
     private Spinner spinWeekDay5;
 
     private String mClassId;
+    CourseListActivity courseListActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_add_class);
 
-        mAddClassgBtn = findViewById(R.id.addClassBtn);
-        if(getIntent().getExtras() == null)
+        Button addClassgBtn = findViewById(R.id.addClassBtn);
+        if(getIntent().getExtras() == null) {
             setTitle("Add Class");
+            courseListActivity = MyGlobal.getInstance().courseListActivity;
+        }
         else {
             setTitle("View Class");
             mClassId = getIntent().getExtras().getString("classId");
-            mAddClassgBtn.setText("");
-            mAddClassgBtn.setEnabled(false);
+            addClassgBtn.setText("Start Class");
+            DBManager db = DBManager.getInstance();
+            db.getClassInfoById(this, mClassId);
         }
 
         mStartDayEText = findViewById(R.id.editTextStartDay);
@@ -79,7 +82,7 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
         mEndDayEText.setClickable(true);
 
         mCourseEText = findViewById(R.id.editTextCourse);
-        mClassromEText = findViewById(R.id.editTextLocation);
+        mClassroomEText = findViewById(R.id.editTextLocation);
         spinWeekDay1 = findViewById(R.id.spinWeekDay1);
         spinWeekDay2 = findViewById(R.id.spinWeekDay2);
         spinWeekDay3 = findViewById(R.id.spinWeekDay3);
@@ -193,14 +196,89 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
             }
         });
 
-        mAddClassgBtn.setOnClickListener(new View.OnClickListener() {
+        addClassgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 //        .setAction("Action", null).show();
-                addClass_onClick();
+                if(mClassId == null) {
+                    addClass_onClick();
+                    courseListActivity.freshClassList();
+                    finish();
+                }
+                else
+                    startClass_onClick();
             }
         });
+    }
+
+    private void startClass_onClick(){
+        Snackbar.make(getCurrentFocus(), "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
+
+    // return class info from DBManager
+    public void getClassInfoFromDB(boolean success, String name, String classroom, String startDay, String endDay){
+        if(!success) {
+            Log.d("AddClassContent ==>", "fail to get class");
+            return;
+        }
+        //Log.d("course list ==>", "class id: "+ id+"   "+name);
+        mCourseEText.setText(name);
+        mClassroomEText.setText(classroom);
+        mStartDayEText.setText(startDay);
+        mEndDayEText.setText(endDay);
+
+        DBManager db = DBManager.getInstance();
+        db.getMeetingsOfClass(this, mClassId);
+    }
+
+    // return meeting info from DBManager
+    public void getMeetingInfoFromDB(boolean success, List<MeetingInfo> list){
+        if(!success) {
+            Log.d("AddClassContent ==>", "fail to get meeting");
+            return;
+        }
+        for(int i=0; i<list.size(); i++){
+            if(i==0){
+                spinWeekDay1.setSelection(getIndexOfWeekDay(list.get(i).weekday));
+                etStartTime1.setText(list.get(i).startTime);
+                etEndTime1.setText(list.get(i).endTime);
+            }
+            else if(i==1){
+                spinWeekDay2.setSelection(getIndexOfWeekDay(list.get(i).weekday));
+                etStartTime2.setText(list.get(i).startTime);
+                etEndTime2.setText(list.get(i).endTime);
+            }
+            else if(i==2){
+                spinWeekDay3.setSelection(getIndexOfWeekDay(list.get(i).weekday));
+                etStartTime3.setText(list.get(i).startTime);
+                etEndTime3.setText(list.get(i).endTime);
+            }
+            else if(i==3){
+                spinWeekDay4.setSelection(getIndexOfWeekDay(list.get(i).weekday));
+                etStartTime4.setText(list.get(i).startTime);
+                etEndTime4.setText(list.get(i).endTime);
+            }
+            else if(i==4){
+                spinWeekDay5.setSelection(getIndexOfWeekDay(list.get(i).weekday));
+                etStartTime5.setText(list.get(i).startTime);
+                etEndTime5.setText(list.get(i).endTime);
+            }
+        }
+    }
+
+    private int getIndexOfWeekDay(String weekday){
+        if(weekday.equals("Monday"))
+            return 1;
+        else if(weekday.equals("Tuesday"))
+            return 2;
+        else if(weekday.equals("Wednesday"))
+            return 3;
+        else if(weekday.equals("Thursday"))
+            return 4;
+        else
+            return 5;
     }
 
     private  void addClass_onClick(){
@@ -209,7 +287,7 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
                 .setAction("Action", null).show();
             return;
         }
-        if(mClassromEText.getText().toString().length()==0) {
+        if(mClassroomEText.getText().toString().length()==0) {
             Snackbar.make(getCurrentFocus(), "location cannot be empty", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
             return;
@@ -273,12 +351,12 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
             return;
         }
         db.addClassToTeacher(mCourseEText.getText().toString(),
-                mClassromEText.getText().toString(),
+                mClassroomEText.getText().toString(),
                 mStartDayEText.getText().toString(),
                 mEndDayEText.getText().toString(),
                 meetingList);
-        finish();
     }
+
     @Override
     public void onClick(View v) {
         final Calendar cldr = Calendar.getInstance();
@@ -364,6 +442,17 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
                 break;
             default:
                 break;
+        }
+    }
+
+    public static class MeetingInfo{
+        public  String weekday;
+        public String startTime;
+        public String endTime;
+        public MeetingInfo(String day, String start, String end){
+            weekday = day;
+            startTime = start;
+            endTime = end;
         }
     }
 }
