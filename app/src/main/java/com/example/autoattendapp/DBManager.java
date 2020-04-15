@@ -160,22 +160,34 @@ public class DBManager {
 
     public void addStudentToClass(String classID, final Context context) {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(firebaseUser != null) {
-            String userUid = firebaseUser.getUid();
-            DocumentReference userRef = database.collection("users").document(userUid);
-            userRef.update(
-                    "classes", FieldValue.arrayUnion(classID)
-            ).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if(task.isSuccessful()) {
-                        Toast.makeText(context, "Class added", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(context, "Class not found", Toast.LENGTH_SHORT).show();
-                    }
+
+        String userUid = firebaseUser.getUid();
+        DocumentReference userRef = database.collection("users").document(userUid);
+        userRef.update(
+                "classes", FieldValue.arrayUnion(classID)
+        ).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()) {
+                    Toast.makeText(context, "Class added", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(context, "Class not added", Toast.LENGTH_SHORT).show();
                 }
-            });
-        }
+            }
+        });
+
+        database.collection("classes").document(classID)
+                .update("students", FieldValue.arrayUnion(userUid))
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()) {
+                    Log.d("DBManager", "added user to class");
+                } else {
+                    Log.d("DBManager", "Error: fail to add user to class", task.getException());
+                }
+            }
+        });
     }
 
     // add a class to teacher account
@@ -190,13 +202,15 @@ public class DBManager {
         mapClass.put("classroom", classroom);
         mapClass.put("start_day", startDay);
         mapClass.put("end_day", endDay);
+        mapClass.put("students", new ArrayList<String>());
         //mapClass.put("meetings", meetingIDs);
 
         //generate class code
         final int min = 100000;
         final int max = 999999;
         final int random = new Random().nextInt((max - min) + 1) + min;
-        mapClass.put("code", random);
+        String code = String.valueOf(random);
+        mapClass.put("code", code);
 
         // Add a new class
         database.collection("classes")
@@ -295,6 +309,8 @@ public class DBManager {
                 }
             }
         });
+
+
     }
 
     /*
@@ -347,6 +363,69 @@ public class DBManager {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         owner.getMeetingInfoFromDB(true, null);
+                    }
+                });
+    }
+
+    public void deleteClass(final String id) {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        final String userUid = firebaseUser.getUid();
+        DocumentReference userRef = database.collection("users").document(userUid);
+
+        //get students in class, then delete class from students class list, then delete class doc
+        database.collection("classes").document(id)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        ArrayList<String> studentList = (ArrayList<String>) document.get("students");
+                        Log.d("STUDENT LIST !!!!!!!!!!", studentList.toString());
+                        for(int i=0; i < studentList.size(); i++) {
+                            deleteClassFromUser(id, studentList.get(i));
+                        }
+                        deleteClassDocument(id);
+                    }
+                }
+            }
+        });
+        //delete class from teacher
+        deleteClassFromUser(id, userUid);
+
+    }
+
+    public void deleteClassFromUser(String classID, String userID) {
+        database.collection("users").document(userID)
+                .update("classes", FieldValue.arrayRemove(classID))
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("database", "class successfully deleted from user!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("database", "Error deleting class from user", e);
+                    }
+                });
+    }
+
+    public void deleteClassDocument(String id) {
+        database.collection("classes").document(id)
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("database", "DocumentSnapshot successfully deleted!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("database", "Error deleting document", e);
                     }
                 });
     }

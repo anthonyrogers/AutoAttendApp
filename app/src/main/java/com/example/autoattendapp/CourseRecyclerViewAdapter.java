@@ -68,7 +68,7 @@ public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<CourseRecycl
                                 mClickListener.onRemoveClick(view, position);
                                 break;
                             case R.id.menuModify:
-                                //mClickListener.onModifyClick(view, position);
+                                mClickListener.onModifyClick(view, position);
                                 break;
                         }
                         return false;
@@ -109,8 +109,10 @@ public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<CourseRecycl
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
-        //void onModifyClick(View view, int position);
+
         void onRemoveClick(View view, int position);
+
+        void onModifyClick(View view, int position);
     }
 
     public static class ClassInfo{
