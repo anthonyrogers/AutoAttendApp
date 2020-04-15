@@ -367,7 +367,7 @@ public class DBManager {
                 });
     }
 
-    public void deleteClass(final String id) {
+    public void deleteClassTeacher(final String id) {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         final String userUid = firebaseUser.getUid();
         DocumentReference userRef = database.collection("users").document(userUid);
@@ -394,6 +394,14 @@ public class DBManager {
         //delete class from teacher
         deleteClassFromUser(id, userUid);
 
+
+    }
+
+    public void deleteClassStudent(String classID) {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        final String userUid = firebaseUser.getUid();
+        deleteClassFromUser(classID, userUid);
+        deleteStudentFromClass(classID, userUid);
     }
 
     public void deleteClassFromUser(String classID, String userID) {
@@ -426,6 +434,23 @@ public class DBManager {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.w("database", "Error deleting document", e);
+                    }
+                });
+    }
+
+    public void deleteStudentFromClass(String classID, String studentID) {
+        database.collection("classes").document(classID)
+                .update("students", FieldValue.arrayRemove(studentID))
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("database", "student successfully deleted from class!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("database", "Error deleting student from class", e);
                     }
                 });
     }

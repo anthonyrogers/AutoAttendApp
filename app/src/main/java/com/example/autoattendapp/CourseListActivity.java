@@ -138,10 +138,10 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
     public void onRemoveClick(View view, int position){
         String classID = mAdapter.getClass(position).classID;
         if(mUserType.equals("Teacher")) {
-            db.deleteClass(classID);
+            db.deleteClassTeacher(classID);
             freshClassList();
         } else {
-
+            db.deleteClassStudent(classID);
         }
     }
 
