@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class TeacherActivity extends AppCompatActivity {
 
@@ -295,6 +296,12 @@ public class TeacherActivity extends AppCompatActivity {
         mapClass.put("course", mEditTextCourse.getText().toString());
         mapClass.put("semester", mEditTextSemester.getText().toString());
         mapClass.put("teachID", userId);
+
+        //generate random class code
+        final int min = 100000;
+        final int max = 999999;
+        final int random = new Random().nextInt((max - min) + 1) + min;
+        mapClass.put("code", random);
 
         // Add a new document with a generated ID
         database.collection("classes")

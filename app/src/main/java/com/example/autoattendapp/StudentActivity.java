@@ -33,6 +33,8 @@ public class StudentActivity extends AppCompatActivity {
         }
         setTitle(student.getFirstName() + " " + student.getLastName());
 
+        dbManager.getClassList();
+
         Button addNew = findViewById(R.id.addNew);
         addNew.setOnClickListener(new View.OnClickListener() {
             @Override

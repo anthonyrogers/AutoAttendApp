@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class DBManager {
 
@@ -190,6 +191,12 @@ public class DBManager {
         mapClass.put("start_day", startDay);
         mapClass.put("end_day", endDay);
         //mapClass.put("meetings", meetingIDs);
+
+        //generate class code
+        final int min = 100000;
+        final int max = 999999;
+        final int random = new Random().nextInt((max - min) + 1) + min;
+        mapClass.put("code", random);
 
         // Add a new class
         database.collection("classes")
