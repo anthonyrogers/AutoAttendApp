@@ -2,7 +2,9 @@ package com.example.autoattendapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -33,7 +35,19 @@ public class StudentAddClassActivity extends AppCompatActivity {
                     DBManager dbManager = DBManager.getInstance();
                     dbManager.checkClassCode(code, StudentAddClassActivity.this.getApplicationContext());
 
+                    final Intent intent = new Intent(StudentAddClassActivity.this, CourseListActivity.class);
+                    intent.putExtra("userType", "Student");
+
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            startActivity(intent);
+                        }
+                    }, 1000);
+
                 }
+
+
             }
         });
     }
