@@ -150,4 +150,10 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
 
     }
 
+    @Override
+    public void onViewCodeClick(View view, int position) {
+        String classID = mAdapter.getClass(position).classID;
+        db.getClassCode(classID, this);
+    }
+
 }

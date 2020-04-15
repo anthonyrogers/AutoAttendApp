@@ -70,6 +70,8 @@ public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<CourseRecycl
                             case R.id.menuModify:
                                 mClickListener.onModifyClick(view, position);
                                 break;
+                            case R.id.menuViewCode:
+                                mClickListener.onViewCodeClick(view, position);
                         }
                         return false;
                     }
@@ -113,6 +115,8 @@ public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<CourseRecycl
         void onRemoveClick(View view, int position);
 
         void onModifyClick(View view, int position);
+
+        void onViewCodeClick(View view, int position);
     }
 
     public static class ClassInfo{

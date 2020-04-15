@@ -454,4 +454,20 @@ public class DBManager {
                     }
                 });
     }
+
+    public void getClassCode(String classID, final Context context) {
+        database.collection(CLASSES).document(classID)
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()) {
+                    String code = "Class code: " + task.getResult().getString("code");
+                    Toast.makeText(context, code, Toast.LENGTH_LONG).show();
+                } else {
+                    String code = "Code does not exist";
+                    Toast.makeText(context, code, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
 }
