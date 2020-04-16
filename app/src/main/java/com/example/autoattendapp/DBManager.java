@@ -204,7 +204,7 @@ public class DBManager {
         mapClass.put("start_day", startDay);
         mapClass.put("end_day", endDay);
         mapClass.put("students", new ArrayList<String>());
-        //Added this because we are sticking a list of meetings in the class now-Anthony
+        mapClass.put("teachID", userUid);
         mapClass.put("meetings", meetingList);
 
         //generate class code
@@ -297,8 +297,6 @@ public class DBManager {
         });
     }
 
-
-
     // get class info by class id
     public void getClassInfoById(final CourseListActivity owner, final String id){
         database.collection(CLASSES).document(id)
@@ -338,21 +336,25 @@ public class DBManager {
                             meetingOfClass.weekday = weekday;
                             meetings.add(meetingOfClass);
                         }
+
                         try {
                             owner.loadMeetingOfUserWithID(true, meetings);
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+
                         try {
                             owner.loadMeetingOfUserWithID(false, null);
                         } catch (ParseException ex) {
                             ex.printStackTrace();
                         }
+
                     }
                 });
 
@@ -403,7 +405,6 @@ public class DBManager {
                         }
                         owner.getMeetingInfoFromDB(true, list);
 
-
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -440,8 +441,9 @@ public class DBManager {
         });
         //delete class from teacher
         deleteClassFromUser(id, userUid);
-    }
 
+
+    }
 
     public void deleteClassStudent(String classID) {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
