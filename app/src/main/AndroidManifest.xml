@@ -23,10 +23,12 @@
         <activity android:name=".StudentAddClassActivity" />
         <activity android:name=".StudentMeetingActivity" />
 
+
         <service
             android:name=".ServiceForBeacon"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            />
 
         <activity android:name=".AccountType" />
         <activity
@@ -42,7 +44,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
+              <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>

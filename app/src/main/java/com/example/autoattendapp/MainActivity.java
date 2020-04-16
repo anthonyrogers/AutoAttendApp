@@ -7,7 +7,9 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -48,6 +50,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -99,11 +102,28 @@ public class MainActivity extends AppCompatActivity {
         //Code for the Beacon Service
         mServiceIntent = new Intent(this, ServiceForBeacon.class);
 
+
         //Checks to see if service is running
         if (!isMyServiceRunning(ServiceForBeacon.class)) {
             Intent serviceIntent = new Intent(this, ServiceForBeacon.class);
+            serviceIntent.setAction("start");
             ContextCompat.startForegroundService(this, serviceIntent);
         }
+
+        //This is the code where we would inject the students end time for the class and set a pending intent with
+        //the alarm manager. when the intent is received by the service, it will read the intent action I set
+        //currently im using the calendar object to fake a time
+        //all this code will be moved into the user activity and it will parse the database for the time that a class ends
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 21);
+        calendar.set(Calendar.MINUTE, 58);
+        calendar.set(Calendar.SECOND, 0); // set the time when youre supposed to stop
+        AlarmManager am =( AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(this, ServiceForBeacon.class);
+        i.setAction("stop");
+        PendingIntent pi = PendingIntent.getForegroundService(this, 0, i, 0);
+        am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
+
 
         dbManager = DBManager.getInstance();
         mAuth = FirebaseAuth.getInstance();

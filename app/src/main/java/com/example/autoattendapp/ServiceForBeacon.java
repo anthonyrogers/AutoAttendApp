@@ -1,6 +1,6 @@
 package com.example.autoattendapp;
 
-import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,26 +10,20 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
-import android.provider.Settings;
 import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
-import org.altbeacon.beacon.BeaconData;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import android.app.NotificationChannel;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.List;
-
-import javax.xml.datatype.Duration;
+import java.util.Date;
 
 
 public class ServiceForBeacon extends Service implements RangeNotifier, BeaconConsumer {
@@ -38,6 +32,8 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     public int counter = 0;
     BeaconManager mBeaconManager;
     Context context;
+    DBManager db = DBManager.getInstance();
+
     public ServiceForBeacon(){}
     public ServiceForBeacon(Context applicationContext) {
         super();
@@ -54,13 +50,23 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
+
+        String action = intent.getAction();
+        if(action.equals("stop")){
+
+            // this is where the code will be to submit the student info to the db
+            stopSelf();
+        }
+
+        //for the beacon
         mBeaconManager = BeaconManager.getInstanceForApplication(this);
         mBeaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
         // Binds this activity to the BeaconService
         mBeaconManager.bind(this);
 
-       createNotificationChannel();
+
+        createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
                 0, notificationIntent, 0);
@@ -120,13 +126,12 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
                 Log.i("BEACON", collection.iterator().next().getIdentifier(0).toString());
                 counter++;
           //  }else{
-               stopSelf();
+              // stopSelf();
            // }
         }else{
             //Since you guys dont have the beacon to connect to i just stopped the service so it wouldn't run in the background
             //for now. will set a condition to stop based off class time
-
-           // stopSelf();
+           //stopSelf();
         }
     }
 }
