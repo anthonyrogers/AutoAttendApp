@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -136,7 +137,33 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
 
     @Override
     public void onRemoveClick(View view, int position){
-        //
+        String classID = mAdapter.getClass(position).classID;
+        if(mUserType.equals("Teacher")) {
+            db.deleteClassTeacher(classID);
+            freshClassList();
+        } else {
+            db.deleteClassStudent(classID);
+        }
+        final Intent intent = new Intent(CourseListActivity.this, CourseListActivity.class);
+        intent.putExtra("userType", mUserType);
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                startActivity(intent);
+            }
+        }, 1000);
+    }
+
+    @Override
+    public void onModifyClick(View view, int position) {
+
+    }
+
+    @Override
+    public void onViewCodeClick(View view, int position) {
+        String classID = mAdapter.getClass(position).classID;
+        db.getClassCode(classID, this);
     }
 
 }

@@ -3,9 +3,11 @@ package com.example.autoattendapp;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -208,6 +210,16 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
                 }
                 else
                     startClass_onClick();
+
+                final Intent intent = new Intent(AddClassContent.this, CourseListActivity.class);
+                intent.putExtra("userType", "Teacher");
+
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        startActivity(intent);
+                    }
+                }, 1000);
             }
         });
     }

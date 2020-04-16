@@ -8,6 +8,10 @@
 
     <item
         android:id="@+id/menuModify"
-        android:title="modify"
+        android:title="Modify"
         />
+
+    <item
+        android:id="@+id/menuViewCode"
+        android:title="View Code" />
 </menu>
