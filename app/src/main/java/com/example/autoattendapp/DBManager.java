@@ -203,6 +203,7 @@ public class DBManager {
         mapClass.put("start_day", startDay);
         mapClass.put("end_day", endDay);
         mapClass.put("students", new ArrayList<String>());
+        mapClass.put("teachID", userUid);
         //mapClass.put("meetings", meetingIDs);
 
         //generate class code
