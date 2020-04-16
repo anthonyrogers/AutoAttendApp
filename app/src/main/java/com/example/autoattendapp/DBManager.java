@@ -22,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -203,7 +204,8 @@ public class DBManager {
         mapClass.put("start_day", startDay);
         mapClass.put("end_day", endDay);
         mapClass.put("students", new ArrayList<String>());
-        //mapClass.put("meetings", meetingIDs);
+        //Added this because we are sticking a list of meetings in the class now-Anthony
+        mapClass.put("meetings", meetingList);
 
         //generate class code
         final int min = 100000;
@@ -295,6 +297,8 @@ public class DBManager {
         });
     }
 
+
+
     // get class info by class id
     public void getClassInfoById(final CourseListActivity owner, final String id){
         database.collection(CLASSES).document(id)
@@ -309,6 +313,48 @@ public class DBManager {
                 }
             }
         });
+
+
+    }
+
+    public void getMeetingsByClassId(final CourseListActivity owner, final String classID){
+        FirebaseFirestore database = MyGlobal.getInstance().gDB;
+        database.collection("meetings")
+                .whereEqualTo("classId", classID)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot documentSnapshots) {
+                        String weekday ="", startTime="", endTime="";
+                        ArrayList<MeetingOfClass> meetings = new ArrayList<>();
+                        for (QueryDocumentSnapshot snap : documentSnapshots) {
+                            Log.d("Get meeting ====>", snap.getId() + " => " + snap.getData());
+                            weekday = snap.getData().get("weekday").toString();
+                            startTime = snap.getData().get("start_time").toString();
+                            endTime = snap.getData().get("end_time").toString();
+                            MeetingOfClass meetingOfClass = new MeetingOfClass();
+                            meetingOfClass.endTime = endTime;
+                            meetingOfClass.startTime = startTime;
+                            meetingOfClass.weekday = weekday;
+                            meetings.add(meetingOfClass);
+                        }
+                        try {
+                            owner.loadMeetingOfUserWithID(true, meetings);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        try {
+                            owner.loadMeetingOfUserWithID(false, null);
+                        } catch (ParseException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
 
 
     }
@@ -357,6 +403,7 @@ public class DBManager {
                         }
                         owner.getMeetingInfoFromDB(true, list);
 
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -393,9 +440,8 @@ public class DBManager {
         });
         //delete class from teacher
         deleteClassFromUser(id, userUid);
-
-
     }
+
 
     public void deleteClassStudent(String classID) {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();

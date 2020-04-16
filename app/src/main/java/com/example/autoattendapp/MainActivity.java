@@ -60,8 +60,8 @@ import java.util.Map;
     to create tables or edit firebase in the future. The login is as follows:
     AutoAttendanceApp1@gmail.com
     pass: Mobile123!
-
 */
+
 public class MainActivity extends AppCompatActivity {
 
     private final String TAG = "MainActivity ===>";
@@ -99,10 +99,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Code for the Beacon Service
+        dbManager = DBManager.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+
+        //Code for the Beacon Service - Anthony
         mServiceIntent = new Intent(this, ServiceForBeacon.class);
-
-
         //Checks to see if service is running
         if (!isMyServiceRunning(ServiceForBeacon.class)) {
             Intent serviceIntent = new Intent(this, ServiceForBeacon.class);
@@ -110,25 +111,7 @@ public class MainActivity extends AppCompatActivity {
             ContextCompat.startForegroundService(this, serviceIntent);
         }
 
-        //This is the code where we would inject the students end time for the class and set a pending intent with
-        //the alarm manager. when the intent is received by the service, it will read the intent action I set
-        //currently im using the calendar object to fake a time
-        //all this code will be moved into the user activity and it will parse the database for the time that a class ends
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 21);
-        calendar.set(Calendar.MINUTE, 58);
-        calendar.set(Calendar.SECOND, 0); // set the time when youre supposed to stop
-        AlarmManager am =( AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
-        Intent i = new Intent(this, ServiceForBeacon.class);
-        i.setAction("stop");
-        PendingIntent pi = PendingIntent.getForegroundService(this, 0, i, 0);
-        am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
-
-
-        dbManager = DBManager.getInstance();
-        mAuth = FirebaseAuth.getInstance();
-
-        //location is needed so this will check for permissions
+        //location is required for beacon so this will check for permissions
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1234);
         }
@@ -162,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    //checks if the service is running before it runs it again - Anthony
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {

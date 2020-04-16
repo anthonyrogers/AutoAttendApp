@@ -23,7 +23,6 @@
         <activity android:name=".StudentAddClassActivity" />
         <activity android:name=".StudentMeetingActivity" />
 
-
         <service
             android:name=".ServiceForBeacon"
             android:enabled="true"

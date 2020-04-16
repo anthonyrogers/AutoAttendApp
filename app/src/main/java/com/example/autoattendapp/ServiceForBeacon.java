@@ -27,8 +27,10 @@ import java.util.Date;
 
 
 public class ServiceForBeacon extends Service implements RangeNotifier, BeaconConsumer {
-    public static final String CHANNEL_ID = "ForegroundServiceChannel";
 
+    //if you have questions on service contact Anthony
+
+    public static final String CHANNEL_ID = "ForegroundServiceChannel";
     public int counter = 0;
     BeaconManager mBeaconManager;
     Context context;

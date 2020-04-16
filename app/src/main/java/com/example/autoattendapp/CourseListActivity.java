@@ -17,8 +17,17 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 public class CourseListActivity extends AppCompatActivity implements CourseRecyclerViewAdapter.ItemClickListener{
@@ -97,7 +106,21 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         for (int i=0; i<classlist.size(); i++) {
             String id = classlist.get(i).toString();
             db.getClassInfoById(this, id);
+            db.getMeetingsByClassId(this, id);
             Log.d("course list ==>", "class id: "+ id);
+        }
+    }
+
+    //still in progress - Anthony
+    public void loadMeetingOfUserWithID(boolean success, ArrayList<MeetingOfClass> meetings) throws ParseException {
+        if(!success){
+            Snackbar.make(getCurrentFocus(), "Fail to load classes of user", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            //Log.d("course list ==>", "Fail to load classes of user");
+            return;
+        }
+        for (MeetingOfClass meeting : meetings) {
+
         }
     }
 
