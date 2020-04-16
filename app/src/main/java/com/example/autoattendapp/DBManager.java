@@ -204,7 +204,7 @@ public class DBManager {
         mapClass.put("end_day", endDay);
         mapClass.put("students", new ArrayList<String>());
         mapClass.put("teachID", userUid);
-        //mapClass.put("meetings", meetingIDs);
+        mapClass.put("meetings", meetingList);
 
         //generate class code
         final int min = 100000;
