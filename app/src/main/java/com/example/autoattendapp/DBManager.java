@@ -36,7 +36,6 @@ public class DBManager {
     public static DBManager dbManager = null;
     FirebaseFirestore database;
 
-
     // define User db variables
     private final String INTENT_FILE_KEY = "UserID";
     public final static String DOC_USERS = "users";
@@ -194,6 +193,7 @@ public class DBManager {
             }
         });
     }
+
 
     //this is tacked on the add class calls which will grab the students active class and set a start pending intent
     //and a stop pending intent for every class day. Each pending intent is setup for weekly schedule
