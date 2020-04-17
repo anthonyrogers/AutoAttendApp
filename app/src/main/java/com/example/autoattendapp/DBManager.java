@@ -4,15 +4,11 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -25,20 +21,15 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 public class DBManager {
 
@@ -232,6 +223,7 @@ public class DBManager {
                             AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
                             Intent i = new Intent(context, ServiceForBeacon.class);
                             i.setAction("start");
+                            i.putExtra("ClassID", classID);
                             PendingIntent pi = PendingIntent.getForegroundService(context, requestcode, i, 0);
                             am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 7, pi);
                             Log.i("MEETING TIMES START list ==>", "" + calendar.getTimeInMillis());
@@ -247,6 +239,7 @@ public class DBManager {
 
 
                             Intent intent = new Intent(context, ServiceForBeacon.class);
+                            intent.putExtra("ClassID", classID);
                             intent.setAction("stop");
                             PendingIntent pi2 = PendingIntent.getForegroundService(context, requestcode, intent, 0);
                             am.setRepeating(AlarmManager.RTC_WAKEUP, calendar2.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 7, pi2);
@@ -340,7 +333,6 @@ public class DBManager {
                                     meetingList.get(i).startTime,
                                     meetingList.get(i).endTime);
                         }
-
                         DocumentReference userRef = database.collection("users").document(userUid);
                         userRef.update(
                                 "classes", FieldValue.arrayUnion(documentReference.getId())
@@ -354,8 +346,6 @@ public class DBManager {
                                 }
                             }
                         });
-
-
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -388,7 +378,6 @@ public class DBManager {
                         Log.w("addClassToTeacher ==>", "Error: fail to adding mapMeeting", e);
                     }
                 });
-
     }
 
     /*
@@ -424,8 +413,6 @@ public class DBManager {
                 }
             }
         });
-
-
     }
 
     /*
