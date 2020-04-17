@@ -75,6 +75,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         //Log.d("course list ==>", userUid);
     }
 
+
     // click add class button
     private void AddClass(){
         if(mUserType.equals("Teacher")) {
@@ -106,21 +107,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         for (int i=0; i<classlist.size(); i++) {
             String id = classlist.get(i).toString();
             db.getClassInfoById(this, id);
-            db.getMeetingsByClassId(this, id);
             Log.d("course list ==>", "class id: "+ id);
-        }
-    }
-
-    //still in progress - Anthony
-    public void loadMeetingOfUserWithID(boolean success, ArrayList<MeetingOfClass> meetings) throws ParseException {
-        if(!success){
-            Snackbar.make(getCurrentFocus(), "Fail to load classes of user", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
-            //Log.d("course list ==>", "Fail to load classes of user");
-            return;
-        }
-        for (MeetingOfClass meeting : meetings) {
-
         }
     }
 

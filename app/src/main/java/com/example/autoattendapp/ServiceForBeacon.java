@@ -29,7 +29,7 @@ import java.util.Date;
 public class ServiceForBeacon extends Service implements RangeNotifier, BeaconConsumer {
 
     //if you have questions on service contact Anthony
-
+    private final String PREFERENCE_FILE_KEY = "UserID";
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
     public int counter = 0;
     BeaconManager mBeaconManager;
@@ -58,28 +58,29 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
 
             // this is where the code will be to submit the student info to the db
             stopSelf();
+        }else if(action.equals("start")){
+
+            //for the beacon
+            mBeaconManager = BeaconManager.getInstanceForApplication(this);
+            mBeaconManager.getBeaconParsers().add(new BeaconParser().
+                    setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
+            // Binds this activity to the BeaconService
+            mBeaconManager.bind(this);
+
+            createNotificationChannel();
+            Intent notificationIntent = new Intent(this, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                    0, notificationIntent, 0);
+            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setContentTitle("You're currently active in class")
+                    .setContentText("This will dismiss when class is over")
+                    .setContentIntent(pendingIntent)
+                    .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .build();
+            startForeground(1, notification);
+        }else{
+
         }
-
-        //for the beacon
-        mBeaconManager = BeaconManager.getInstanceForApplication(this);
-        mBeaconManager.getBeaconParsers().add(new BeaconParser().
-                setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
-        // Binds this activity to the BeaconService
-        mBeaconManager.bind(this);
-
-
-        createNotificationChannel();
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                0, notificationIntent, 0);
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("You're currently active in class")
-                .setContentText("This will dismiss when class is over")
-                .setContentIntent(pendingIntent)
-                .setSmallIcon(R.mipmap.ic_launcher_round)
-                .build();
-        startForeground(1, notification);
-
         return START_NOT_STICKY;
     }
 

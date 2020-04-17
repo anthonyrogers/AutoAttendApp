@@ -12,6 +12,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -65,6 +66,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private final String TAG = "MainActivity ===>";
+    private final String PREFERENCE_FILE_KEY = "UserID";
 
     private LoginInfo mLoginInfo;
     private Button createAccount;
@@ -87,6 +89,10 @@ public class MainActivity extends AppCompatActivity {
             } else if(msg.arg1 == User.STUDENT){
                 Intent studentIntent = new Intent(MainActivity.this, CourseListActivity.class);
                 studentIntent.putExtra("userType", "Student");
+                //saving current user to shared pref so i can access it in the service when main activity is not running - Anthony
+                Context context = getApplicationContext();
+                SharedPreferences sharedPref = context.getSharedPreferences(PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
+                sharedPref.edit().putString(PREFERENCE_FILE_KEY, mAuth.getCurrentUser().getUid()).apply();
                 startActivity(studentIntent);
             } else {
                 Log.d("Error", "Error? Handle.");
@@ -94,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
     });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,15 +108,6 @@ public class MainActivity extends AppCompatActivity {
 
         dbManager = DBManager.getInstance();
         mAuth = FirebaseAuth.getInstance();
-
-        //Code for the Beacon Service - Anthony
-        mServiceIntent = new Intent(this, ServiceForBeacon.class);
-        //Checks to see if service is running
-        if (!isMyServiceRunning(ServiceForBeacon.class)) {
-            Intent serviceIntent = new Intent(this, ServiceForBeacon.class);
-            serviceIntent.setAction("start");
-            ContextCompat.startForegroundService(this, serviceIntent);
-        }
 
         //location is required for beacon so this will check for permissions
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -145,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    //checks if the service is running before it runs it again - Anthony
+    //checks if the service is running before it runs it again. MIGHT NOT NEED just keep for now please - Anthony
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -221,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     try {
+
                         saveLoginInfoToFile();
                     } catch (IOException e) {
                         e.printStackTrace();

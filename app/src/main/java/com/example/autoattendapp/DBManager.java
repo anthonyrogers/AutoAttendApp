@@ -1,6 +1,10 @@
 package com.example.autoattendapp;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -23,12 +27,18 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public class DBManager {
 
@@ -37,6 +47,7 @@ public class DBManager {
 
 
     // define User db variables
+    private final String INTENT_FILE_KEY = "UserID";
     public final static String DOC_USERS = "users";
     public final static String FIRSTNAME = "firstname";
     public final static String LASTNAME = "lastname";
@@ -151,6 +162,7 @@ public class DBManager {
                                 String classID = document.getId();
                                 Log.d("ClassID", classID);
                                 addStudentToClass(classID, context);
+
                             }
                         } else {
                             Log.d("ClassCodeError", "Error getting documents: ", task.getException());
@@ -159,7 +171,7 @@ public class DBManager {
                 });
     }
 
-    public void addStudentToClass(String classID, final Context context) {
+    public void addStudentToClass(final String classID, final Context context) {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         String userUid = firebaseUser.getUid();
@@ -184,12 +196,113 @@ public class DBManager {
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()) {
                     Log.d("DBManager", "added user to class");
+                    getUsersMettings(classID, context);
                 } else {
                     Log.d("DBManager", "Error: fail to add user to class", task.getException());
                 }
             }
         });
     }
+
+    //this is tacked on the add class calls which will grab the students active class and set a start pending intent
+    //and a stop pending intent for every class day. Each pending intent is setup for weekly schedule
+    public void getUsersMettings(final String classID, final Context context) {
+
+        DocumentReference userRef = database.collection("classes").document(classID);
+        userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()) {
+                    ArrayList<HashMap<String, String>> name = (ArrayList<HashMap<String, String>>) task.getResult().get("meetings");
+                    for(HashMap<String, String> meeting : name){
+                      //this is for the dates and creating pending intents for each class
+                        SimpleDateFormat displayFormat = new SimpleDateFormat("HH:mm");
+                        SimpleDateFormat parseFormat = new SimpleDateFormat("hh:mma");
+                        try {
+                            Date date = parseFormat.parse(meeting.get("startTime"));
+                            String time[] = displayFormat.format(date).split(":");
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTimeInMillis(System.currentTimeMillis());
+                            calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time[0]));
+                            calendar.set(Calendar.MINUTE, Integer.parseInt(time[1]));
+                            calendar.set(Calendar.DAY_OF_WEEK, findDayOfWeek(meeting.get("weekday")));
+                            int requestcode = generateRandomNumber();
+
+                            //setup for startup time
+                            AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                            Intent i = new Intent(context, ServiceForBeacon.class);
+                            i.setAction("start");
+                            PendingIntent pi = PendingIntent.getForegroundService(context, requestcode, i, 0);
+                            am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 7, pi);
+                            Log.i("MEETING TIMES START list ==>", "" + calendar.getTimeInMillis());
+
+
+                            Date date2 = parseFormat.parse(meeting.get("endTime"));
+                            String time2[] = displayFormat.format(date2).split(":");
+                            Calendar calendar2 = Calendar.getInstance();
+                            calendar2.setTimeInMillis(System.currentTimeMillis());
+                            calendar2.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time2[0]));
+                            calendar2.set(Calendar.MINUTE, Integer.parseInt(time2[1]));
+                            calendar2.set(Calendar.DAY_OF_WEEK, findDayOfWeek(meeting.get("weekday")));
+
+
+                            Intent intent = new Intent(context, ServiceForBeacon.class);
+                            intent.setAction("stop");
+                            PendingIntent pi2 = PendingIntent.getForegroundService(context, requestcode, intent, 0);
+                            am.setRepeating(AlarmManager.RTC_WAKEUP, calendar2.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 7, pi2);
+                            Log.i("MEETING TIMES START list ==>", "" + calendar2.getTimeInMillis());
+
+                           /* this will be for saving the unique ids for the pending intents in shared pref. So each pending intent
+                            that uses a different request code is unique and we can cancel it with that request code. I created
+                            a random generator to generate request codes. we only need to create one class code per set of times
+                            (start time and end time) because the "setAction" is different on both intents which also makes them
+                            unique. We can both intents with request code or the action button which in our case is start and stop */
+                           //didnt quite get this working yet but just leave commented out for now
+
+                           /* SharedPreferences sharedPref = context.getSharedPreferences(INTENT_FILE_KEY, Context.MODE_PRIVATE);
+                            HashSet<String> prevPermissions = new HashSet<>();
+                            prevPermissions.addAll(sharedPref.getStringSet(classID, new HashSet<String>()));
+                            prevPermissions.add("" + requestcode);
+                            sharedPref.edit().putStringSet(classID, prevPermissions).apply();
+                            for(String string : prevPermissions) {
+                                Log.i("SHARED PREF", string);
+                            } */
+
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                    Log.i("INTENTS", "DID NOT CREATE INTENTS", task.getException());
+                }
+            }
+        });
+    }
+    private int generateRandomNumber(){
+        //this is for creating unique numbers for intents which we will keep track of - Anthony
+        final int min = 100000;
+        final int max = 999999;
+        final int random = new Random().nextInt((max - min) + 1) + min;
+        return random;
+    }
+
+    private int findDayOfWeek(String dayOfWeek){
+        switch (dayOfWeek) {
+            case  "Monday":
+                return 2;
+            case "Tuesday":
+                return 3;
+            case "Wednesday":
+                return 4;
+            case "Thursday":
+                return 5;
+            case "Friday":
+                return 6;
+            default:
+                return 0;
+        }
+    }
+
 
     // add a class to teacher account
     public void addClassToTeacher(String course, String classroom, String startDay, String endDay,
@@ -311,52 +424,6 @@ public class DBManager {
                 }
             }
         });
-
-
-    }
-
-    public void getMeetingsByClassId(final CourseListActivity owner, final String classID){
-        FirebaseFirestore database = MyGlobal.getInstance().gDB;
-        database.collection("meetings")
-                .whereEqualTo("classId", classID)
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot documentSnapshots) {
-                        String weekday ="", startTime="", endTime="";
-                        ArrayList<MeetingOfClass> meetings = new ArrayList<>();
-                        for (QueryDocumentSnapshot snap : documentSnapshots) {
-                            Log.d("Get meeting ====>", snap.getId() + " => " + snap.getData());
-                            weekday = snap.getData().get("weekday").toString();
-                            startTime = snap.getData().get("start_time").toString();
-                            endTime = snap.getData().get("end_time").toString();
-                            MeetingOfClass meetingOfClass = new MeetingOfClass();
-                            meetingOfClass.endTime = endTime;
-                            meetingOfClass.startTime = startTime;
-                            meetingOfClass.weekday = weekday;
-                            meetings.add(meetingOfClass);
-                        }
-
-                        try {
-                            owner.loadMeetingOfUserWithID(true, meetings);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
-                        try {
-                            owner.loadMeetingOfUserWithID(false, null);
-                        } catch (ParseException ex) {
-                            ex.printStackTrace();
-                        }
-
-                    }
-                });
 
 
     }
