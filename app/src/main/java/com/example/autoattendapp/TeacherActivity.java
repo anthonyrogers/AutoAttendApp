@@ -391,7 +391,7 @@ public class TeacherActivity extends AppCompatActivity {
                         mMeetingList.clear();
                         List<String> list = new ArrayList<String>();
                         for (QueryDocumentSnapshot snap : documentSnapshots) {
-                            Log.d(TAG, snap.getId() + " => " + snap.getData());
+                           Log.d(TAG, snap.getId() + " => " + snap.getData());
                             beaconID = snap.getData().get("beaconID").toString();
                             classroom = snap.getData().get("classroom").toString();
                             classtime = snap.getData().get("classtime").toString();

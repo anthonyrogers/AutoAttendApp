@@ -406,9 +406,9 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
         if (hour >= 12) {
             if (hour > 12)
                 hour -= 12;
-            strTime = String.format("%02d : %02d PM", hour, minute);
+            strTime = String.format("%02d:%02dPM", hour, minute);
         } else
-            strTime = String.format("%02d : %02d AM", hour, minute);
+            strTime = String.format("%02d:%02dAM", hour, minute);
         switch (iWhichTime) {
             case 10:
                 etStartTime1.setText(strTime);

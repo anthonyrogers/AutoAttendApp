@@ -17,8 +17,17 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 public class CourseListActivity extends AppCompatActivity implements CourseRecyclerViewAdapter.ItemClickListener{
@@ -65,6 +74,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         //final String userUid = firebaseUser.getUid();
         //Log.d("course list ==>", userUid);
     }
+
 
     // click add class button
     private void AddClass(){
