@@ -145,11 +145,11 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
 
         List<String> list = new ArrayList<String>();
         list.add("");
-        list.add("Monday");
-        list.add("Tuesday");
-        list.add("Wednesday");
-        list.add("Thursday");
-        list.add("Friday");
+        list.add(MeetingOfClass.MONDAY);
+        list.add(MeetingOfClass.TUESDAY);
+        list.add(MeetingOfClass.WEDNESDAY);
+        list.add(MeetingOfClass.THURSDAY);
+        list.add(MeetingOfClass.FRIDAY);
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getApplicationContext(),
                 android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -253,45 +253,33 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
         }
         for(int i=0; i<list.size(); i++){
             if(i==0){
-                spinWeekDay1.setSelection(getIndexOfWeekDay(list.get(i).weekday));
+                spinWeekDay1.setSelection(MeetingOfClass.getIndexOfWeekDay(list.get(i).weekday));
                 etStartTime1.setText(list.get(i).startTime);
                 etEndTime1.setText(list.get(i).endTime);
             }
             else if(i==1){
-                spinWeekDay2.setSelection(getIndexOfWeekDay(list.get(i).weekday));
+                spinWeekDay2.setSelection(MeetingOfClass.getIndexOfWeekDay(list.get(i).weekday));
                 etStartTime2.setText(list.get(i).startTime);
                 etEndTime2.setText(list.get(i).endTime);
             }
             else if(i==2){
-                spinWeekDay3.setSelection(getIndexOfWeekDay(list.get(i).weekday));
+                spinWeekDay3.setSelection(MeetingOfClass.getIndexOfWeekDay(list.get(i).weekday));
                 etStartTime3.setText(list.get(i).startTime);
                 etEndTime3.setText(list.get(i).endTime);
             }
             else if(i==3){
-                spinWeekDay4.setSelection(getIndexOfWeekDay(list.get(i).weekday));
+                spinWeekDay4.setSelection(MeetingOfClass.getIndexOfWeekDay(list.get(i).weekday));
                 etStartTime4.setText(list.get(i).startTime);
                 etEndTime4.setText(list.get(i).endTime);
             }
             else if(i==4){
-                spinWeekDay5.setSelection(getIndexOfWeekDay(list.get(i).weekday));
+                spinWeekDay5.setSelection(MeetingOfClass.getIndexOfWeekDay(list.get(i).weekday));
                 etStartTime5.setText(list.get(i).startTime);
                 etEndTime5.setText(list.get(i).endTime);
             }
         }
     }
 
-    private int getIndexOfWeekDay(String weekday){
-        if(weekday.equals("Monday"))
-            return 1;
-        else if(weekday.equals("Tuesday"))
-            return 2;
-        else if(weekday.equals("Wednesday"))
-            return 3;
-        else if(weekday.equals("Thursday"))
-            return 4;
-        else
-            return 5;
-    }
 
     private  void addClass_onClick(){
         if(mCourseEText.getText().toString().length()==0) {

@@ -9,4 +9,9 @@ public class Student extends User implements Parcelable {
     public Student(String firstName, String lastName, String ID, String email, ArrayList<String> courses){
         super(firstName, lastName, ID, email, courses, null);
     }
+
+    @Override
+    public int getType() {
+        return User.STUDENT;
+    }
 }

@@ -22,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +44,8 @@ public class DBManager {
     public final static String USERTYPE = "usertype";
     public final static String CLASSES = "classes";
     public final static String BEACON = "beacon";
+
+
     private List<String> classes;
 
     private DBManager() {
@@ -81,8 +84,8 @@ public class DBManager {
         database.collection(DOC_USERS).document(authID).set(docMap);
     }
 
-    public void loadUser(final Handler handler) {
-        database.collection(DOC_USERS).document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+    public void loadUser(String uID, final Handler handler) {
+        database.collection(DOC_USERS).document(uID)
         .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -94,13 +97,15 @@ public class DBManager {
                     ArrayList<String> classIDs = (ArrayList<String>) task.getResult().get(CLASSES);
                     String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     Message msg = Message.obtain();
+                    User user;
                     if(userType == User.TEACHER) {
                         String beaconID = task.getResult().getString(BEACON);
-                        Account.setTeacherAccount(new Teacher(firstName, lastName, userID, email, classIDs, beaconID));
+                        user = new Teacher(firstName, lastName, userID, email, classIDs, beaconID);
                     } else {
-                        Account.setStudentAccount(new Student(firstName, lastName, userID, email, classIDs));
+                        user = new Student(firstName, lastName, userID, email, classIDs);
                     }
                     msg.arg1 = userType;
+                    msg.obj = user;
                     handler.sendMessage(msg);
                 } else {
                     Message msg = Message.obtain();
@@ -111,16 +116,6 @@ public class DBManager {
         });
     }
 
-    /*
-    public String addClass(String className, String location, Date startDate, Date endDate, Map<DayOfWeek, LocalTime> meetings, Teacher teacher) {
-        DocumentReference ref = database.collection("classes").document();
-        String classID = ref.getId();
-        Map<String, Object> docMap = new HashMap<>();
-        docMap.put("class", className);
-        docMap.put("location", location);
-        docMap.put("")
-        return classID;
-    }*/
 
     public void getClassList() {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -212,7 +207,8 @@ public class DBManager {
         final int random = new Random().nextInt((max - min) + 1) + min;
         String code = String.valueOf(random);
         mapClass.put("code", code);
-
+        DocumentReference docRef = database.collection("attendance").document();
+        String myId = docRef.getId();
         // Add a new class
         database.collection("classes")
                 .add(mapClass)
@@ -250,6 +246,65 @@ public class DBManager {
                         Log.w("addClassToTeacher ==>", "Error: fail to adding class", e);
                     }
                 });
+        // add a meeting associated with the class
+        addSkeletonAttendance(myId, startDay, endDay, meetingList);
+    }
+
+    private void addSkeletonAttendance(String classID, String startDay, String endDay, final ArrayList<MeetingOfClass> meetingList) {
+        final Map<String, Object> attendanceMap = new HashMap<>();
+        attendanceMap.put("classID", classID);
+        LocalDate start = getDateFromString(startDay);
+        LocalDate end = getDateFromString(endDay);
+        List<String> allDates = getAllDates(start, end, meetingList);
+        List<Map<String, Object>> dates = new ArrayList<>();
+        for(String date: allDates) {
+            Map<String, Object> currentDate = new HashMap<>();
+            currentDate.put("date", date);
+            currentDate.put("students", new ArrayList<HashMap<String, String>>());
+            dates.add(currentDate);
+        }
+        attendanceMap.put("dates", dates);
+        database.collection("attendance")
+                .add(attendanceMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentReference> task) {
+                if(!task.isSuccessful()){
+                    Log.d("DBManager", "Error: failed to add attendance map", task.getException());
+                }
+            }
+        });
+    }
+
+
+    private List<String> getAllDates(LocalDate start, LocalDate end, List<MeetingOfClass> meetings) {
+        List<String> allDates = new ArrayList<>();
+        for(LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
+            int day = date.getDayOfWeek().ordinal() + 1;
+            for(MeetingOfClass meeting : meetings) {
+                if(MeetingOfClass.getIndexOfWeekDay(meeting.weekday) == day) {
+                    allDates.add(getStringFromDate(date));
+                    break;
+                }
+            }
+        }
+        return allDates;
+    }
+
+    private LocalDate getDateFromString(String date) {
+        String[] tokenized = date.split("/");
+        int[] dmy = new int[3];
+        for(int i=0; i < 3; i++) {
+            dmy[i] = (int) Integer.valueOf(tokenized[i]);
+        }
+        return LocalDate.of(dmy[2], dmy[0], dmy[1]);
+    }
+
+    private String getStringFromDate(LocalDate date){
+        String[] tokenized = date.toString().split("-");
+        String year = tokenized[0];
+        String month = tokenized[1];
+        String day = tokenized[2];
+        return String.join("/", month, day, year);
     }
 
     // add a meeting to its class
