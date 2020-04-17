@@ -278,7 +278,7 @@ public class DBManager {
 
     private List<String> getAllDates(LocalDate start, LocalDate end, List<MeetingOfClass> meetings) {
         List<String> allDates = new ArrayList<>();
-        for(LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
+        for(LocalDate date = start; date.isEqual(end); date = date.plusDays(1)) {
             int day = date.getDayOfWeek().ordinal() + 1;
             for(MeetingOfClass meeting : meetings) {
                 if(MeetingOfClass.getIndexOfWeekDay(meeting.weekday) == day) {
