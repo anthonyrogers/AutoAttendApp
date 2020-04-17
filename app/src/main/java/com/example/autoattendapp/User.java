@@ -91,6 +91,10 @@ public class User implements Parcelable {
     public String getBeacon() { return beacon; }
     public void setBeacon(String beacon){this.beacon = beacon;}
 
+    public int getType() {
+        return -1;
+    }
+
     @Override
     public boolean equals(Object user) {
         if(((User) user).getID() == this.ID) {

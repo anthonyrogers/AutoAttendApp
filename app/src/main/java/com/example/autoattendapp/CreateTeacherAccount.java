@@ -35,10 +35,13 @@ public class CreateTeacherAccount extends AppCompatActivity {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
             if(msg.arg1 == User.TEACHER) {
-                Intent teacherIntent = new Intent(CreateTeacherAccount.this, TeacherActivity.class);
+                //Intent teacherIntent = new Intent(MainActivity.this, TeacherActivity.class);
+                Intent teacherIntent = new Intent(CreateTeacherAccount.this, CourseListActivity.class);
+                teacherIntent.putExtra("userType", "Teacher");
                 startActivity(teacherIntent);
             } else if(msg.arg1 == User.STUDENT){
-                Intent studentIntent = new Intent(CreateTeacherAccount.this, StudentActivity.class);
+                Intent studentIntent = new Intent(CreateTeacherAccount.this, CourseListActivity.class);
+                studentIntent.putExtra("userType", "Student");
                 startActivity(studentIntent);
             } else {
                 Log.d("Error", "Error? Handle.");
@@ -109,7 +112,7 @@ public class CreateTeacherAccount extends AppCompatActivity {
                 if(task.isSuccessful()) {
                     Toast.makeText(getApplicationContext(), "Successfully Registered", Toast.LENGTH_LONG).show();
                     dbManager.addTeacher(fAuth.getUid(), firstName, lastName, userEmail, beacon);
-                    dbManager.loadUser(loginHandler);
+                    dbManager.loadUser(FirebaseAuth.getInstance().getUid(), loginHandler);
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
