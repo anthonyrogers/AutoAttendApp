@@ -11,4 +11,8 @@ public class Teacher extends User implements Parcelable {
         super(firstName, lastName, ID, email, courses, beacon);
     }
 
+    @Override
+    public int getType() {
+        return User.TEACHER;
+    }
 }
