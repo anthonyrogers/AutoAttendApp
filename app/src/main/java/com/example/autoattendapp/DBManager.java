@@ -1,14 +1,18 @@
 package com.example.autoattendapp;
 
 import android.app.AlarmManager;
+import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -27,9 +31,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public class DBManager {
 
@@ -37,7 +43,7 @@ public class DBManager {
     FirebaseFirestore database;
 
     // define User db variables
-    private final String INTENT_FILE_KEY = "UserID";
+    private final String INTENT_FILE_KEY = "IntentIDs";
     public final static String DOC_USERS = "users";
     public final static String FIRSTNAME = "firstname";
     public final static String LASTNAME = "lastname";
@@ -198,7 +204,6 @@ public class DBManager {
     //this is tacked on the add class calls which will grab the students active class and set a start pending intent
     //and a stop pending intent for every class day. Each pending intent is setup for weekly schedule
     public void getUsersMettings(final String classID, final Context context) {
-
         DocumentReference userRef = database.collection("classes").document(classID);
         userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -209,6 +214,11 @@ public class DBManager {
                       //this is for the dates and creating pending intents for each class
                         SimpleDateFormat displayFormat = new SimpleDateFormat("HH:mm");
                         SimpleDateFormat parseFormat = new SimpleDateFormat("hh:mma");
+                          /*  this block will convert the hours in the database to military time and then set a calendar
+                              to that date which will be passed along to the alarm manager after creating the pending intnets
+                              the first block is for the start time and the second block is for the endtime. I generate the
+                              unique ids for the request code of the intents and then save them in shared preferences. This will delete
+                              the pending intents if a user removes the class from their list. */
                         try {
                             Date date = parseFormat.parse(meeting.get("startTime"));
                             String time[] = displayFormat.format(date).split(":");
@@ -245,21 +255,13 @@ public class DBManager {
                             am.setRepeating(AlarmManager.RTC_WAKEUP, calendar2.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 7, pi2);
                             Log.i("MEETING TIMES START list ==>", "" + calendar2.getTimeInMillis());
 
-                           /* this will be for saving the unique ids for the pending intents in shared pref. So each pending intent
-                            that uses a different request code is unique and we can cancel it with that request code. I created
-                            a random generator to generate request codes. we only need to create one class code per set of times
-                            (start time and end time) because the "setAction" is different on both intents which also makes them
-                            unique. We can both intents with request code or the action button which in our case is start and stop */
-                           //didnt quite get this working yet but just leave commented out for now
+                            //We only need to store one request code id for both start and end intents because we
+                            //set and a different action to each one which makes that intent filterable and unique
+                            SharedPreferences sharedPref = context.getSharedPreferences(INTENT_FILE_KEY, Context.MODE_PRIVATE);
+                            sharedPref.edit().putString(classID, requestcode + "").apply();
+                            Log.i("SHARED PREF SAVED",  sharedPref.getString(classID, null));
 
-                           /* SharedPreferences sharedPref = context.getSharedPreferences(INTENT_FILE_KEY, Context.MODE_PRIVATE);
-                            HashSet<String> prevPermissions = new HashSet<>();
-                            prevPermissions.addAll(sharedPref.getStringSet(classID, new HashSet<String>()));
-                            prevPermissions.add("" + requestcode);
-                            sharedPref.edit().putStringSet(classID, prevPermissions).apply();
-                            for(String string : prevPermissions) {
-                                Log.i("SHARED PREF", string);
-                            } */
+
 
                         } catch (ParseException e) {
                             e.printStackTrace();
@@ -499,11 +501,33 @@ public class DBManager {
 
     }
 
-    public void deleteClassStudent(String classID) {
+    public void deleteClassStudent(String classID, Context context) {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         final String userUid = firebaseUser.getUid();
+
         deleteClassFromUser(classID, userUid);
         deleteStudentFromClass(classID, userUid);
+
+        //everything below will removed the pending intents from each class that are saved in shared pref
+        SharedPreferences sharedPref = context.getSharedPreferences(INTENT_FILE_KEY, Context.MODE_PRIVATE);
+        String savedIntent = sharedPref.getString(classID, null);
+
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, ServiceForBeacon.class);
+        intent.putExtra("ClassID", classID);
+        intent.setAction("stop");
+        PendingIntent pi2 = PendingIntent.getForegroundService(context, Integer.parseInt(savedIntent), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        pi2.cancel();
+        am.cancel(pi2);
+
+        Intent intent2 = new Intent(context, ServiceForBeacon.class);
+        intent2.putExtra("ClassID", classID);
+        intent2.setAction("start");
+        PendingIntent pi = PendingIntent.getForegroundService(context, Integer.parseInt(savedIntent), intent2, PendingIntent.FLAG_CANCEL_CURRENT);
+        pi.cancel();
+        am.cancel(pi);
+        Log.i("INTENTS CANCELED", "FOR " + classID + " CLASS");
+
     }
 
     public void deleteClassFromUser(String classID, String userID) {

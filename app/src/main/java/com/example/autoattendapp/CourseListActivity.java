@@ -152,7 +152,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
             db.deleteClassTeacher(classID);
             freshClassList();
         } else {
-            db.deleteClassStudent(classID);
+            db.deleteClassStudent(classID, this);
         }
         final Intent intent = new Intent(CourseListActivity.this, CourseListActivity.class);
         intent.putExtra("userType", mUserType);
