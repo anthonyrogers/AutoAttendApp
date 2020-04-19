@@ -655,4 +655,81 @@ public class DBManager {
             }
         });
     }
+
+    // marks the students attendance when they first hit the beacon
+    // if they never hit the beacon, timeIn will be null
+    public void markAttendance(String classID, String date, String firstName, String lastName, String timeIn) {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser == null)
+            return;
+        final String studentID = firebaseUser.getUid();
+
+        Map<String, Object> attendance = new HashMap<>();
+        attendance.put("classID", classID);
+        attendance.put("date", date);
+        attendance.put("studentID", studentID);
+        attendance.put("firstName", firstName);
+        attendance.put("lastName", lastName);
+        attendance.put("timeIn", timeIn);
+
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        database.collection("attendance")
+                .add(attendance)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("addAttendance ==>","added an attendance.");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("addAttendance ==>", "Error: fail to adding attendance", e);
+                    }
+                });
+    }
+
+    //finds the attendance document ID by date and studentID
+    //updates the document with the time out
+    public void markTimeOut(String classID, String date, final String timeOut) {
+        final FirebaseFirestore database = FirebaseFirestore.getInstance();
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser == null)
+            return;
+        final String studentID = firebaseUser.getUid();
+
+        database.collection("attendance")
+                .whereEqualTo("studentID", studentID)
+                .whereEqualTo("classID", classID)
+                .whereEqualTo("date", date)
+                .limit(1)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String attendanceID = document.getId();
+                                DocumentReference attendanceRef = database.collection("attendance").document(attendanceID);
+                                attendanceRef
+                                        .update("timeOut", timeOut)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Log.d("time out", "logged");
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w("time out", "could not be logged", e);
+                                            }
+                                        });
+                            }
+                        } else {
+                            Log.d("database", "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+    }
 }

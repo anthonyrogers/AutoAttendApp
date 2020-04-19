@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         readLoginInfoFromFile();
         email.setText(mLoginInfo.getEmail());
         password.setText(mLoginInfo.getPassword());
+
     }
 
     @Override

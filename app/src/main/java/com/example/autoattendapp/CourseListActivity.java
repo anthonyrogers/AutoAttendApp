@@ -73,6 +73,10 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         //FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         //final String userUid = firebaseUser.getUid();
         //Log.d("course list ==>", userUid);
+
+        //testing attendance marking
+        //db.markAttendance("1234", "04/19/2020", "test", "user", "12:00");
+        //db.markTimeOut("1234", "04/19/2020", "12:50");
     }
 
 

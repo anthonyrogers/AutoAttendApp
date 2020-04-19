@@ -22,14 +22,22 @@ import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import android.app.NotificationChannel;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class ServiceForBeacon extends Service implements RangeNotifier, BeaconConsumer {
@@ -147,6 +155,84 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
         });
     }
 
+    // marks the students attendance when they first hit the beacon
+    // if they never hit the beacon, timeIn will be null
+    public void markAttendance(String date, String firstName, String lastName, String timeIn) {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser == null)
+            return;
+        final String studentID = firebaseUser.getUid();
+
+        Map<String, Object> attendance = new HashMap<>();
+        attendance.put("classID", classID);
+        attendance.put("date", date);
+        attendance.put("studentID", studentID);
+        attendance.put("firstName", firstName);
+        attendance.put("lastName", lastName);
+        attendance.put("timeIn", timeIn);
+
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        database.collection("attendance")
+                .add(attendance)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("addAttendance ==>","added an attendance.");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("addAttendance ==>", "Error: fail to adding attendance", e);
+                    }
+                });
+    }
+
+    //finds the attendance document ID by date, classID, and studentID
+    //updates the document with the time out
+    public void markTimeOut(String date, final String timeOut) {
+        final FirebaseFirestore database = FirebaseFirestore.getInstance();
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser == null)
+            return;
+        final String studentID = firebaseUser.getUid();
+
+        database.collection("attendance")
+                .whereEqualTo("studentID", studentID)
+                .whereEqualTo("classID", classID)
+                .whereEqualTo("date", date)
+                .limit(1)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String attendanceID = document.getId();
+                                DocumentReference attendanceRef = database.collection("attendance").document(attendanceID);
+                                attendanceRef
+                                        .update("timeOut", timeOut)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Log.d("time out", "logged");
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w("time out", "could not be logged", e);
+                                            }
+                                        });
+                            }
+                        } else {
+                            Log.d("database", "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+    }
+
+
     //notification channels are needed in newer android OS. It allows the user to go under the settings in an
     //app and change what notifications they want from our app. In this case, we just have one.
     //if the user were to turn off notifications from us, the service should still stay running.
@@ -211,4 +297,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
                 }
         }
     }
+
+
 }
