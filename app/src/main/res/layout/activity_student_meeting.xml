@@ -50,21 +50,10 @@
         android:id="@+id/timeInText2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="180dp"
         android:text="@string/time_in"
         android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="@+id/classroomText"
-        app:layout_constraintTop_toBottomOf="@+id/classroomText" />
-
-    <TextView
-        android:id="@+id/classroomText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="150dp"
-        android:text="@string/classroom"
-        android:textSize="24sp"
-        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -87,16 +76,6 @@
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="@+id/durationText"
         app:layout_constraintTop_toBottomOf="@+id/durationText" />
-
-    <TextView
-        android:id="@+id/roomText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="36dp"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="@+id/classroomText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/classroomText" />
 
     <TextView
         android:id="@+id/inText"
