@@ -1,12 +1,16 @@
 package com.example.autoattendapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -40,6 +44,19 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
     private DBManager db;
     private Button mAddButton;
     private String mUserType;
+    public static int MsgType_FreshList = 1;
+
+    Handler msgHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            if(msg.arg1 == MsgType_FreshList) {
+                freshClassList();
+            } else {
+                Log.d("CourseListActivity msg Error", "Error? Handle.");
+            }
+            return false;
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +86,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
 
         db = DBManager.getInstance();
         db.getClassIdsOfUser(this);
+        MyGlobal.getInstance().handlerCourseListAcitviey = msgHandler;
 
         //FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         //final String userUid = firebaseUser.getUid();
