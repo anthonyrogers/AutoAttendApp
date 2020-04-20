@@ -1,5 +1,7 @@
 package com.example.autoattendapp;
 
+import android.os.Handler;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MyGlobal {
@@ -8,6 +10,7 @@ public class MyGlobal {
     public User gUser;
     public LoginInfo gLoginInfo;
     public CourseListActivity courseListActivity;
+    public Handler handlerCourseListAcitviey;
     public FirebaseFirestore gDB = FirebaseFirestore.getInstance();;
 
     protected MyGlobal(){}

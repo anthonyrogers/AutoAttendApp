@@ -55,7 +55,6 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
     private Spinner spinWeekDay5;
 
     private String mClassId;
-    CourseListActivity courseListActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +64,7 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
         Button addClassgBtn = findViewById(R.id.addClassBtn);
         if(getIntent().getExtras() == null) {
             setTitle("Add Class");
-            courseListActivity = MyGlobal.getInstance().courseListActivity;
+
         }
         else {
             setTitle("View Class");
@@ -205,12 +204,11 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
                 //        .setAction("Action", null).show();
                 if(mClassId == null) {
                     addClass_onClick();
-                    courseListActivity.freshClassList();
                     finish();
                 }
                 else
                     startClass_onClick();
-
+                /*
                 final Intent intent = new Intent(AddClassContent.this, CourseListActivity.class);
                 intent.putExtra("userType", "Teacher");
 
@@ -219,7 +217,7 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
                     public void run() {
                         startActivity(intent);
                     }
-                }, 1000);
+                }, 1000);*/
             }
         });
     }

@@ -343,6 +343,10 @@ public class DBManager {
                             public void onComplete(@NonNull Task<Void> task) {
                                 if(task.isSuccessful()) {
                                     //Log.d("DBManager", "added class to user");
+                                    Handler handler = MyGlobal.getInstance().handlerCourseListAcitviey;
+                                    Message msg = Message.obtain();
+                                    msg.arg1 = CourseListActivity.MsgType_FreshList;
+                                    handler.sendMessage(msg);
                                 } else {
                                     Log.d("DBManager", "Error: fail to add class to user", task.getException());
                                 }
