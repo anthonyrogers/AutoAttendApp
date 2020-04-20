@@ -70,6 +70,7 @@ public class DBManager {
     public final static String START_DAY = "start_day";
     public final static String END_DAY = "end_day";
     public final static String TEACH_ID = "teachID";
+    public final static String PAST_MEETINGS = "pastMeetings";
 
     // define attendance db variables
     public final static String DOC_ATTEND = "attendance";
@@ -139,8 +140,6 @@ public class DBManager {
         docMap.put(BEACON, beaconID);
         database.collection(DOC_USERS).document(authID).set(docMap);
     }
-
-
     /**
      * This function loads a User object from the given ID
      * and sends the object to the calling handler
@@ -371,6 +370,7 @@ public class DBManager {
         mapClass.put(STUDENTS, new ArrayList<String>());
         mapClass.put(TEACH_ID, userUid);
         mapClass.put(CLASS_MTGS, meetingList);
+        mapClass.put(PAST_MEETINGS, new ArrayList<String>());
 
         //generate class code
         final int min = 100000;
