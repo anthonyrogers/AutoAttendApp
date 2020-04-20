@@ -58,6 +58,32 @@ public class DBManager {
     public final static String CLASSES = "classes";
     public final static String BEACON = "beacon";
 
+    // define classes db variables
+    public final static String COURSE = "course";
+    public final static String DOC_CLASSES = "classes";
+    public final static String CLASSROOM = "classroom";
+    public final static String COURSE_CODE = "code";
+    public final static String STUDENTS = "students";
+    public final static String CLASS_MTGS = "meetings";
+    public final static String START_TIME = "startTime";
+    public final static String END_TIME = "endTime";
+    public final static String START_DAY = "start_day";
+    public final static String END_DAY = "end_day";
+    public final static String TEACH_ID = "teachID";
+
+    // define attendance db variables
+    public final static String DOC_ATTEND = "attendance";
+    public final static String CLASS_ID = "classID";
+    public final static String STUDENT_ID = "studentID";
+    public final static String FIRST_NAME = "firstName";
+    public final static String LAST_NAME = "lastName";
+    public final static String DATES = "dates";
+    public final static String DATE = "date";
+    public final static String WEEKDAY = "weekday";
+    public final static String TIME_IN = "timeIn";
+    public final static String TIME_OUT = "timeOut";
+
+
 
     private List<String> classes;
 
@@ -76,6 +102,14 @@ public class DBManager {
         return null;
     }
 
+    /**
+     * This function takes in the information about a student and adds them to the database
+     *
+     * @param authID - The Firebase Auth ID of the user
+     * @param firstName - The student's first name
+     * @param lastName - The student's last name
+     * @param email - The student's email
+     */
     public void addStudent(String authID, String firstName, String lastName, String email) {
         Map<String, Object> docMap = new HashMap<>();
         docMap.put(FIRSTNAME, firstName);
@@ -86,6 +120,15 @@ public class DBManager {
         database.collection(DOC_USERS).document(authID).set(docMap);
     }
 
+    /**
+     * This function takes in the information about a teacher and adds them to the database
+     *
+     * @param authID - The Firebase Auth ID of the user
+     * @param firstName - The teacher's first name
+     * @param lastName - The teacher's last name
+     * @param email - The teacher's email
+     * @param beaconID - The teacher's beacon ID
+     */
     public void addTeacher(String authID, String firstName, String lastName, String email, String beaconID) {
         Map<String, Object> docMap = new HashMap<>();
         docMap.put(FIRSTNAME, firstName);
@@ -97,6 +140,14 @@ public class DBManager {
         database.collection(DOC_USERS).document(authID).set(docMap);
     }
 
+
+    /**
+     * This function loads a User object from the given ID
+     * and sends the object to the calling handler
+     *
+     * @param uID - the Firebase Auth ID of the User
+     * @param handler - a callback handler
+     */
     public void loadUser(String uID, final Handler handler) {
         database.collection(DOC_USERS).document(uID)
         .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -134,11 +185,11 @@ public class DBManager {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if(firebaseUser != null) {
             String userUid = firebaseUser.getUid();
-            DocumentReference userRef = database.collection("users").document(userUid);
+            DocumentReference userRef = database.collection(DOC_USERS).document(userUid);
             userRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    classes = (List<String>) documentSnapshot.get("classes");
+                    classes = (List<String>) documentSnapshot.get(DOC_CLASSES);
                     Log.d("class", classes.get(0));
                 }
             });
@@ -147,8 +198,8 @@ public class DBManager {
 
     //check student class code, if class exists call addStudentToClass
     public void checkClassCode(String classCode, final Context context) {
-        database.collection("classes")
-                .whereEqualTo("code", classCode)
+        database.collection(DOC_CLASSES)
+                .whereEqualTo(COURSE_CODE, classCode)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -167,13 +218,19 @@ public class DBManager {
                 });
     }
 
+    /**
+     * This function adds a class to the students document
+     *
+     * @param classID - the ID of the class to be added to
+     * @param context - the context of the activity calling the function
+     */
     public void addStudentToClass(final String classID, final Context context) {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         String userUid = firebaseUser.getUid();
-        DocumentReference userRef = database.collection("users").document(userUid);
+        DocumentReference userRef = database.collection(DOC_USERS).document(userUid);
         userRef.update(
-                "classes", FieldValue.arrayUnion(classID)
+                DOC_CLASSES, FieldValue.arrayUnion(classID)
         ).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -185,8 +242,8 @@ public class DBManager {
             }
         });
 
-        database.collection("classes").document(classID)
-                .update("students", FieldValue.arrayUnion(userUid))
+        database.collection(DOC_CLASSES).document(classID)
+                .update(STUDENTS, FieldValue.arrayUnion(userUid))
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -204,12 +261,12 @@ public class DBManager {
     //this is tacked on the add class calls which will grab the students active class and set a start pending intent
     //and a stop pending intent for every class day. Each pending intent is setup for weekly schedule
     public void getUsersMettings(final String classID, final Context context) {
-        DocumentReference userRef = database.collection("classes").document(classID);
+        DocumentReference userRef = database.collection(DOC_CLASSES).document(classID);
         userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful()) {
-                    ArrayList<HashMap<String, String>> name = (ArrayList<HashMap<String, String>>) task.getResult().get("meetings");
+                    ArrayList<HashMap<String, String>> name = (ArrayList<HashMap<String, String>>) task.getResult().get(CLASS_MTGS);
                     for(HashMap<String, String> meeting : name){
                       //this is for the dates and creating pending intents for each class
                         SimpleDateFormat displayFormat = new SimpleDateFormat("HH:mm");
@@ -220,13 +277,13 @@ public class DBManager {
                               unique ids for the request code of the intents and then save them in shared preferences. This will delete
                               the pending intents if a user removes the class from their list. */
                         try {
-                            Date date = parseFormat.parse(meeting.get("startTime"));
+                            Date date = parseFormat.parse(meeting.get(START_TIME));
                             String time[] = displayFormat.format(date).split(":");
                             Calendar calendar = Calendar.getInstance();
                             calendar.setTimeInMillis(System.currentTimeMillis());
                             calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time[0]));
                             calendar.set(Calendar.MINUTE, Integer.parseInt(time[1]));
-                            calendar.set(Calendar.DAY_OF_WEEK, findDayOfWeek(meeting.get("weekday")));
+                            calendar.set(Calendar.DAY_OF_WEEK, findDayOfWeek(meeting.get(WEEKDAY)));
                             int requestcode = generateRandomNumber();
 
                             //setup for startup time
@@ -239,13 +296,13 @@ public class DBManager {
                             Log.i("MEETING TIMES START list ==>", "" + calendar.getTimeInMillis());
 
 
-                            Date date2 = parseFormat.parse(meeting.get("endTime"));
+                            Date date2 = parseFormat.parse(meeting.get(END_TIME));
                             String time2[] = displayFormat.format(date2).split(":");
                             Calendar calendar2 = Calendar.getInstance();
                             calendar2.setTimeInMillis(System.currentTimeMillis());
                             calendar2.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time2[0]));
                             calendar2.set(Calendar.MINUTE, Integer.parseInt(time2[1]));
-                            calendar2.set(Calendar.DAY_OF_WEEK, findDayOfWeek(meeting.get("weekday")));
+                            calendar2.set(Calendar.DAY_OF_WEEK, findDayOfWeek(meeting.get(WEEKDAY)));
 
 
                             Intent intent = new Intent(context, ServiceForBeacon.class);
@@ -283,15 +340,15 @@ public class DBManager {
 
     private int findDayOfWeek(String dayOfWeek){
         switch (dayOfWeek) {
-            case  "Monday":
+            case  MeetingOfClass.MONDAY:
                 return 2;
-            case "Tuesday":
+            case MeetingOfClass.TUESDAY:
                 return 3;
-            case "Wednesday":
+            case MeetingOfClass.WEDNESDAY:
                 return 4;
-            case "Thursday":
+            case MeetingOfClass.THURSDAY:
                 return 5;
-            case "Friday":
+            case MeetingOfClass.FRIDAY:
                 return 6;
             default:
                 return 0;
@@ -307,24 +364,24 @@ public class DBManager {
             return;
         final String userUid = firebaseUser.getUid();
         final Map<String, Object> mapClass = new HashMap<>();
-        mapClass.put("course", course);
-        mapClass.put("classroom", classroom);
-        mapClass.put("start_day", startDay);
-        mapClass.put("end_day", endDay);
-        mapClass.put("students", new ArrayList<String>());
-        mapClass.put("teachID", userUid);
-        mapClass.put("meetings", meetingList);
+        mapClass.put(COURSE, course);
+        mapClass.put(CLASSROOM, classroom);
+        mapClass.put(START_DAY, startDay);
+        mapClass.put(END_DAY, endDay);
+        mapClass.put(STUDENTS, new ArrayList<String>());
+        mapClass.put(TEACH_ID, userUid);
+        mapClass.put(CLASS_MTGS, meetingList);
 
         //generate class code
         final int min = 100000;
         final int max = 999999;
         final int random = new Random().nextInt((max - min) + 1) + min;
         String code = String.valueOf(random);
-        mapClass.put("code", code);
-        DocumentReference docRef = database.collection("attendance").document();
+        mapClass.put(COURSE_CODE, code);
+        DocumentReference docRef = database.collection(DOC_ATTEND).document();
         String myId = docRef.getId();
         // Add a new class
-        database.collection("classes")
+        database.collection(DOC_CLASSES)
                 .add(mapClass)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
@@ -336,9 +393,9 @@ public class DBManager {
                                     meetingList.get(i).startTime,
                                     meetingList.get(i).endTime);
                         }*/
-                        DocumentReference userRef = database.collection("users").document(userUid);
+                        DocumentReference userRef = database.collection(DOC_USERS).document(userUid);
                         userRef.update(
-                                "classes", FieldValue.arrayUnion(documentReference.getId())
+                                CLASSES, FieldValue.arrayUnion(documentReference.getId())
                         ).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -365,21 +422,31 @@ public class DBManager {
         addSkeletonAttendance(myId, startDay, endDay, meetingList);
     }
 
+
+    /**
+     * This function adds the empty attendance document as a framework
+     * once a classs has been added to the database
+     *
+     * @param classID - the ID of the class to be added
+     * @param startDay - the start date of the class
+     * @param endDay - the end date of the class
+     * @param meetingList - ArrayList of MeetingOfClass objects
+     */
     private void addSkeletonAttendance(String classID, String startDay, String endDay, final ArrayList<MeetingOfClass> meetingList) {
         final Map<String, Object> attendanceMap = new HashMap<>();
-        attendanceMap.put("classID", classID);
+        attendanceMap.put(CLASS_ID, classID);
         LocalDate start = getDateFromString(startDay);
         LocalDate end = getDateFromString(endDay);
         List<String> allDates = getAllDates(start, end, meetingList);
         List<Map<String, Object>> dates = new ArrayList<>();
         for(String date: allDates) {
             Map<String, Object> currentDate = new HashMap<>();
-            currentDate.put("date", date);
-            currentDate.put("students", new ArrayList<HashMap<String, String>>());
+            currentDate.put(DATE, date);
+            currentDate.put(STUDENTS, new ArrayList<HashMap<String, String>>());
             dates.add(currentDate);
         }
-        attendanceMap.put("dates", dates);
-        database.collection("attendance")
+        attendanceMap.put(DATES, dates);
+        database.collection(DOC_ATTEND)
                 .add(attendanceMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
             @Override
             public void onComplete(@NonNull Task<DocumentReference> task) {
@@ -391,6 +458,15 @@ public class DBManager {
     }
 
 
+    /**
+     * This function returns a list of strings representing the
+     * dates the class will occur up to and including the end date
+     *
+     * @param start - the start date of the class
+     * @param end - the end date of the class
+     * @param meetings - ArrayList of MeetingOfClass objects
+     * @return - List of dates between start/end
+     */
     private List<String> getAllDates(LocalDate start, LocalDate end, List<MeetingOfClass> meetings) {
         List<String> allDates = new ArrayList<>();
         for(LocalDate date = start; date.isBefore(end) || date.isEqual(end); date = date.plusDays(1)) {
@@ -405,6 +481,13 @@ public class DBManager {
         return allDates;
     }
 
+    /**
+     * This function takes in a String of format MM/DD/YYYY
+     * and returns a LocalDate object representation of it
+     *
+     * @param date - the String representation of the date
+     * @return - LocalDate object from the date
+     */
     private LocalDate getDateFromString(String date) {
         String[] tokenized = date.split("/");
         int[] dmy = new int[3];
@@ -414,6 +497,13 @@ public class DBManager {
         return LocalDate.of(dmy[2], dmy[0], dmy[1]);
     }
 
+    /**
+     * This function takes in a LocalDate object and returns
+     * a string in the format of MM/DD/YYYYY
+     *
+     * @param date - the LocalDate object
+     * @return - String representation of the date (MM/DD/YYYY)
+     */
     private String getStringFromDate(LocalDate date){
         String[] tokenized = date.toString().split("-");
         String year = tokenized[0];
@@ -472,7 +562,7 @@ public class DBManager {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful()) {
-                    String name = task.getResult().getString("course");
+                    String name = task.getResult().getString(COURSE);
                     owner.getClassInfoById(true, id, name);
                 } else {
                     owner.getClassInfoById(false, null, null);
@@ -491,15 +581,15 @@ public class DBManager {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful()) {
-                    String course = task.getResult().getString("course");
-                    String classroom = task.getResult().getString("classroom");
-                    String start_day = task.getResult().getString("start_day");
-                    String end_day = task.getResult().getString("end_day");
+                    String course = task.getResult().getString(COURSE);
+                    String classroom = task.getResult().getString(CLASSROOM);
+                    String start_day = task.getResult().getString(START_DAY);
+                    String end_day = task.getResult().getString(END_DAY);
                     ArrayList<AddClassContent.MeetingInfo> meetings = new ArrayList<AddClassContent.MeetingInfo>();
-                    ArrayList<HashMap<String, String>> names = (ArrayList<HashMap<String, String>>) task.getResult().get("meetings");
+                    ArrayList<HashMap<String, String>> names = (ArrayList<HashMap<String, String>>) task.getResult().get(CLASS_MTGS);
                     for(HashMap<String, String> meeting : names){
-                        AddClassContent.MeetingInfo meetingInfo = new AddClassContent.MeetingInfo(meeting.get("weekday"),
-                                meeting.get("startTime"), meeting.get("endTime"));
+                        AddClassContent.MeetingInfo meetingInfo = new AddClassContent.MeetingInfo(meeting.get(WEEKDAY),
+                                meeting.get(START_TIME), meeting.get(END_TIME));
                         meetings.add(meetingInfo);
                     }
                     owner.getClassInfoFromDB(true, course, classroom, start_day, end_day, meetings);
@@ -548,14 +638,14 @@ public class DBManager {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if(firebaseUser == null)
             return;
-        DocumentReference classes = database.collection("classes").document(classID);
+        DocumentReference classes = database.collection(DOC_CLASSES).document(classID);
 
-        CollectionReference meeting = classes.collection("meetings");
-        classes.update("course", course);
-        classes.update("classroom", classroom);
-        classes.update("start_day", startDay);
-        classes.update("end_day", endDay);
-        classes.update("meetings",meetingList)
+        CollectionReference meeting = classes.collection(CLASS_MTGS);
+        classes.update(COURSE, course);
+        classes.update(CLASSROOM, classroom);
+        classes.update(START_DAY, startDay);
+        classes.update(END_DAY, endDay);
+        classes.update(CLASS_MTGS, meetingList)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -575,10 +665,10 @@ public class DBManager {
     public void deleteClassTeacher(final String id) {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         final String userUid = firebaseUser.getUid();
-        DocumentReference userRef = database.collection("users").document(userUid);
+        DocumentReference userRef = database.collection(DOC_USERS).document(userUid);
 
         //get students in class, then delete class from students class list, then delete class doc
-        database.collection("classes").document(id)
+        database.collection(DOC_CLASSES).document(id)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -586,7 +676,7 @@ public class DBManager {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        ArrayList<String> studentList = (ArrayList<String>) document.get("students");
+                        ArrayList<String> studentList = (ArrayList<String>) document.get(STUDENTS);
                         Log.d("STUDENT LIST !!!!!!!!!!", studentList.toString());
                         for(int i=0; i < studentList.size(); i++) {
                             deleteClassFromUser(id, studentList.get(i));
@@ -631,8 +721,8 @@ public class DBManager {
     }
 
     public void deleteClassFromUser(String classID, String userID) {
-        database.collection("users").document(userID)
-                .update("classes", FieldValue.arrayRemove(classID))
+        database.collection(DOC_USERS).document(userID)
+                .update(CLASSES, FieldValue.arrayRemove(classID))
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -652,7 +742,7 @@ public class DBManager {
     }
 
     public void deleteClassDocument(String id) {
-        database.collection("classes").document(id)
+        database.collection(DOC_CLASSES).document(id)
                 .delete()
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -669,8 +759,8 @@ public class DBManager {
     }
 
     public void deleteStudentFromClass(String classID, String studentID) {
-        database.collection("classes").document(classID)
-                .update("students", FieldValue.arrayRemove(studentID))
+        database.collection(DOC_CLASSES).document(classID)
+                .update(STUDENTS, FieldValue.arrayRemove(studentID))
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -691,7 +781,7 @@ public class DBManager {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful()) {
-                    String code = "Class code: " + task.getResult().getString("code");
+                    String code = "Class code: " + task.getResult().getString(COURSE_CODE);
                     Toast.makeText(context, code, Toast.LENGTH_LONG).show();
                 } else {
                     String code = "Code does not exist";
@@ -710,15 +800,15 @@ public class DBManager {
         final String studentID = firebaseUser.getUid();
 
         Map<String, Object> attendance = new HashMap<>();
-        attendance.put("classID", classID);
-        attendance.put("date", date);
-        attendance.put("studentID", studentID);
-        attendance.put("firstName", firstName);
-        attendance.put("lastName", lastName);
-        attendance.put("timeIn", timeIn);
+        attendance.put(CLASS_ID, classID);
+        attendance.put(DATE, date);
+        attendance.put(STUDENT_ID, studentID);
+        attendance.put(FIRST_NAME, firstName);
+        attendance.put(LAST_NAME, lastName);
+        attendance.put(TIME_IN, timeIn);
 
         FirebaseFirestore database = FirebaseFirestore.getInstance();
-        database.collection("attendance")
+        database.collection(DOC_ATTEND)
                 .add(attendance)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
@@ -743,10 +833,10 @@ public class DBManager {
             return;
         final String studentID = firebaseUser.getUid();
 
-        database.collection("attendance")
-                .whereEqualTo("studentID", studentID)
-                .whereEqualTo("classID", classID)
-                .whereEqualTo("date", date)
+        database.collection(DOC_ATTEND)
+                .whereEqualTo(STUDENT_ID, studentID)
+                .whereEqualTo(CLASS_ID, classID)
+                .whereEqualTo(DATE, date)
                 .limit(1)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -755,9 +845,9 @@ public class DBManager {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String attendanceID = document.getId();
-                                DocumentReference attendanceRef = database.collection("attendance").document(attendanceID);
+                                DocumentReference attendanceRef = database.collection(DOC_ATTEND).document(attendanceID);
                                 attendanceRef
-                                        .update("timeOut", timeOut)
+                                        .update(TIME_OUT, timeOut)
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
