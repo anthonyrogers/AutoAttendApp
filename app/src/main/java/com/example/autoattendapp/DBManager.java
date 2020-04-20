@@ -590,7 +590,6 @@ public class DBManager {
         pi.cancel();
         am.cancel(pi);
         Log.i("INTENTS CANCELED", "FOR " + classID + " CLASS");
-
     }
 
     public void deleteClassFromUser(String classID, String userID) {
@@ -599,7 +598,11 @@ public class DBManager {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d("database", "class successfully deleted from user!");
+                        //Log.d("database", "class successfully deleted from user!");
+                        Handler handler = MyGlobal.getInstance().handlerCourseListAcitviey;
+                        Message msg = Message.obtain();
+                        msg.arg1 = CourseListActivity.MsgType_FreshList;
+                        handler.sendMessage(msg);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
