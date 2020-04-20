@@ -237,6 +237,35 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
                 }, 1000);*/
             }
         });
+
+        if(getTitle().toString().equals("View Class")){
+            makeControlsReadOnly();
+        }
+    }
+
+    private void makeControlsReadOnly(){
+        //.setEnabled(false);
+        mCourseEText.setEnabled(false);
+        mClassroomEText.setEnabled(false);
+        mStartDayEText.setEnabled(false);
+        mEndDayEText.setEnabled(false);
+
+        spinWeekDay1.setEnabled(false);
+        spinWeekDay2.setEnabled(false);
+        spinWeekDay3.setEnabled(false);
+        spinWeekDay4.setEnabled(false);
+        spinWeekDay5.setEnabled(false);
+
+        etStartTime1.setEnabled(false);
+        etEndTime1.setEnabled(false);
+        etStartTime2.setEnabled(false);
+        etEndTime2.setEnabled(false);
+        etStartTime3.setEnabled(false);
+        etEndTime3.setEnabled(false);
+        etStartTime4.setEnabled(false);
+        etEndTime4.setEnabled(false);
+        etStartTime5.setEnabled(false);
+        etEndTime5.setEnabled(false);
     }
 
     private void startClass_onClick(){

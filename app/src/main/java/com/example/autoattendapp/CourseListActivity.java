@@ -187,6 +187,10 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
     //modify a class
     @Override
     public void onModifyClick(View view, int position) {
+        if(!mUserType.equals("Teacher")){
+            Toast.makeText(this, "Student cannot modify class info.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Intent intent = new Intent(CourseListActivity.this, AddClassContent.class);
 
         String classID = mAdapter.getClass(position).classID;
