@@ -15,6 +15,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class StudentMeetingActivity extends AppCompatActivity {
 
 
@@ -29,9 +33,9 @@ public class StudentMeetingActivity extends AppCompatActivity {
         final TextView durationText = findViewById(R.id.durText);
         final TextView attendText = findViewById(R.id.attendText);
 
-        //TODO: get these from selected meeting date as extras
-        String classID = "1234";
-        final String date = "04/19/2020";
+        //TODO: pass these from selected meeting date as extras
+        String classID = getIntent().getExtras().getString("classID");
+        final String date = getIntent().getExtras().getString("date");;
         setTitle(date);
 
         final FirebaseFirestore database = FirebaseFirestore.getInstance();
@@ -51,11 +55,38 @@ public class StudentMeetingActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                inText.setText((String) document.get("timeIn"));
-                                outText.setText((String) document.get("timeOut"));
-                                //TODO fix these
-                                durationText.setText("duration");
-                                attendText.setText("attended");
+                                String timeIn = (String) document.get("timeIn");
+                                String timeOut = (String) document.get("timeOut");
+                                inText.setText(timeIn);
+                                outText.setText(timeOut);
+
+                                SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+                                Date in = null;
+                                try {
+                                    in = format.parse(timeIn);
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                Date out = null;
+                                try {
+                                    out = format.parse(timeOut);
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                //Log.d("In:", String.valueOf(in));
+                                //Log.d("Out:", String.valueOf(out));
+                                long difference = out.getTime() - in.getTime();
+                                //Log.d("difference", out.getTime()+ "-" +in.getTime());
+                                //Log.d("Diff:", String.valueOf(difference));
+                                String dur = String.valueOf(difference/1000/60);
+                                durationText.setText(dur + " minutes");
+
+                                if(timeIn != null) {
+                                    attendText.setText("Yes");
+                                } else {
+                                    attendText.setText("No");
+                                }
+
                             }
                         } else {
                             Log.d("database", "Error getting documents: ", task.getException());
