@@ -236,14 +236,13 @@ public class TeacherActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "meeting successfully updated!");
-                        getMeetingOfClass();
+                        Log.d(TAG, "class successfully updated!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error updating meeting", e);
+                        Log.w(TAG, "Error: updating class", e);
                     }
                 });
     }
