@@ -172,10 +172,11 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         String classID = mAdapter.getClass(position).classID;
         if(mUserType.equals("Teacher")) {
             db.deleteClassTeacher(classID);
-            freshClassList();
+            //freshClassList();
         } else {
             db.deleteClassStudent(classID, this);
         }
+        /*
         final Intent intent = new Intent(CourseListActivity.this, CourseListActivity.class);
         intent.putExtra("userType", mUserType);
 
@@ -184,12 +185,12 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
             public void run() {
                 startActivity(intent);
             }
-        }, 1000);
+        }, 1000);*/
     }
 
     @Override
     public void onModifyClick(View view, int position) {
-
+        Toast.makeText(this, "it will come soon.", Toast.LENGTH_SHORT).show();
     }
 
     @Override
