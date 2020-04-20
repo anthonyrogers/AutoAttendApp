@@ -54,6 +54,8 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
     private Spinner spinWeekDay4;
     private Spinner spinWeekDay5;
 
+    Button addClassgBtn;
+
     private String mClassId;
 
     @Override
@@ -61,17 +63,26 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_add_class);
 
-        Button addClassgBtn = findViewById(R.id.addClassBtn);
+        addClassgBtn = findViewById(R.id.addClassBtn);
         if(getIntent().getExtras() == null) {
             setTitle("Add Class");
-
         }
         else {
-            setTitle("View Class");
-            mClassId = getIntent().getExtras().getString("classId");
-            addClassgBtn.setText("Start Class");
-            DBManager db = DBManager.getInstance();
-            db.getClassInfoById(this, mClassId);
+            mClassId = getIntent().getExtras().getString("classId-view");
+            if(mClassId != null){
+                setTitle("View Class");
+                addClassgBtn.setText("Start Class");
+                DBManager db = DBManager.getInstance();
+                db.getClassInfoById(this, mClassId);
+            }else {
+                mClassId = getIntent().getExtras().getString("classId-modify");
+                if (mClassId != null) {
+                    setTitle("Modify Class");
+                    addClassgBtn.setText("Modify");
+                    DBManager db = DBManager.getInstance();
+                    db.getClassInfoById(this, mClassId);
+                }
+            }
         }
 
         mStartDayEText = findViewById(R.id.editTextStartDay);
@@ -205,9 +216,15 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
                 if(mClassId == null) {
                     addClass_onClick();
                     finish();
+                }else{
+                    if(addClassgBtn.getText().toString().equals("Modify"))
+                    {
+                        addClass_onClick();
+                        finish();
+                    }
+                    else
+                        startClass_onClick();
                 }
-                else
-                    startClass_onClick();
                 /*
                 final Intent intent = new Intent(AddClassContent.this, CourseListActivity.class);
                 intent.putExtra("userType", "Teacher");
@@ -225,10 +242,14 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
     private void startClass_onClick(){
         Snackbar.make(getCurrentFocus(), "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
+        //Turn on the Beacon
+        //connect to the beacon
+        //show the attendances
     }
 
     // return class info from DBManager
-    public void getClassInfoFromDB(boolean success, String name, String classroom, String startDay, String endDay){
+    public void getClassInfoFromDB(boolean success, String name, String classroom, String startDay,
+                                   String endDay, ArrayList<MeetingInfo> list){
         if(!success) {
             Log.d("AddClassContent ==>", "fail to get class");
             return;
@@ -239,16 +260,6 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
         mStartDayEText.setText(startDay);
         mEndDayEText.setText(endDay);
 
-        DBManager db = DBManager.getInstance();
-        db.getMeetingsOfClass(this, mClassId);
-    }
-
-    // return meeting info from DBManager
-    public void getMeetingInfoFromDB(boolean success, List<MeetingInfo> list){
-        if(!success) {
-            Log.d("AddClassContent ==>", "fail to get meeting");
-            return;
-        }
         for(int i=0; i<list.size(); i++){
             if(i==0){
                 spinWeekDay1.setSelection(MeetingOfClass.getIndexOfWeekDay(list.get(i).weekday));
@@ -348,11 +359,21 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
                     .setAction("Action", null).show();
             return;
         }
-        db.addClassToTeacher(mCourseEText.getText().toString(),
-                mClassroomEText.getText().toString(),
-                mStartDayEText.getText().toString(),
-                mEndDayEText.getText().toString(),
-                meetingList);
+        //modify class
+        if(addClassgBtn.getText().toString().equals("Modify")) {
+            db.ModifyClassOfTeacher(mClassId, mCourseEText.getText().toString(),
+                    mClassroomEText.getText().toString(),
+                    mStartDayEText.getText().toString(),
+                    mEndDayEText.getText().toString(),
+                    meetingList);
+        }// add a class
+        else{
+            db.addClassToTeacher(mCourseEText.getText().toString(),
+                    mClassroomEText.getText().toString(),
+                    mStartDayEText.getText().toString(),
+                    mEndDayEText.getText().toString(),
+                    meetingList);
+        }
     }
 
     @Override

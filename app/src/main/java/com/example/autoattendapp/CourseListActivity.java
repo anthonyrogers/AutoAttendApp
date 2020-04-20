@@ -142,7 +142,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         mAdapter.notifyDataSetChanged();
     }
 
-    // recycler view click
+    // recycler view item click open the class
     @Override
     public void onItemClick(View view, int position) {
         Intent intent = new Intent(CourseListActivity.this, AddClassContent.class);
@@ -159,7 +159,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
             Toast.makeText(this, "class info error.", Toast.LENGTH_SHORT).show();
             return;
         }
-        intent.putExtra("classId", classID);
+        intent.putExtra("classId-view", classID);
         startActivity(intent);
     }
 
@@ -184,9 +184,25 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         }, 1000);*/
     }
 
+    //modify a class
     @Override
     public void onModifyClick(View view, int position) {
-        Toast.makeText(this, "it will come soon.", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(CourseListActivity.this, AddClassContent.class);
+
+        String classID = mAdapter.getClass(position).classID;
+        Iterator<CourseRecyclerViewAdapter.ClassInfo> iter = mClassQueue.iterator();
+        CourseRecyclerViewAdapter.ClassInfo classInfo = null;
+        while (iter.hasNext()) {
+            classInfo = (CourseRecyclerViewAdapter.ClassInfo) iter.next();
+            if (classID.equals(classInfo.classID))
+                break;
+        }
+        if (classInfo == null) {
+            Toast.makeText(this, "class info error2.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        intent.putExtra("classId-modify", classID);
+        startActivity(intent);
     }
 
     @Override

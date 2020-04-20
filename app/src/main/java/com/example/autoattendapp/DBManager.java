@@ -19,6 +19,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -329,12 +330,12 @@ public class DBManager {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.d("addClassToTeacher ==>","added a class: "+documentReference.getId());
-                        for (int i=0; i< meetingList.size(); i++){
+                        /*for (int i=0; i< meetingList.size(); i++){
                             addMeetingsToClass(documentReference.getId(),
                                     meetingList.get(i).weekday,
                                     meetingList.get(i).startTime,
                                     meetingList.get(i).endTime);
-                        }
+                        }*/
                         DocumentReference userRef = database.collection("users").document(userUid);
                         userRef.update(
                                 "classes", FieldValue.arrayUnion(documentReference.getId())
@@ -421,7 +422,7 @@ public class DBManager {
         return String.join("/", month, day, year);
     }
 
-    // add a meeting to its class
+    /*/ add a meeting to its class
     private void addMeetingsToClass(String classId, String weekday, String starttime,String endtime){
         ArrayList<String> meetingIDs = new ArrayList<String>();
         Map<String, Object> mapMeeting = new HashMap<>();
@@ -443,7 +444,7 @@ public class DBManager {
                         Log.w("addClassToTeacher ==>", "Error: fail to adding mapMeeting", e);
                     }
                 });
-    }
+    }*/
 
     /*
      * for course list only ========================================================================
@@ -464,7 +465,7 @@ public class DBManager {
         });
     }
 
-    // get class info by class id
+    // get class info by class id to courseListActivity
     public void getClassInfoById(final CourseListActivity owner, final String id){
         database.collection(CLASSES).document(id)
                 .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -490,19 +491,26 @@ public class DBManager {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful()) {
-                    String name = task.getResult().getString("course");
+                    String course = task.getResult().getString("course");
                     String classroom = task.getResult().getString("classroom");
                     String start_day = task.getResult().getString("start_day");
                     String end_day = task.getResult().getString("end_day");
-                    owner.getClassInfoFromDB(true, name, classroom, start_day, end_day);
+                    ArrayList<AddClassContent.MeetingInfo> meetings = new ArrayList<AddClassContent.MeetingInfo>();
+                    ArrayList<HashMap<String, String>> names = (ArrayList<HashMap<String, String>>) task.getResult().get("meetings");
+                    for(HashMap<String, String> meeting : names){
+                        AddClassContent.MeetingInfo meetingInfo = new AddClassContent.MeetingInfo(meeting.get("weekday"),
+                                meeting.get("startTime"), meeting.get("endTime"));
+                        meetings.add(meetingInfo);
+                    }
+                    owner.getClassInfoFromDB(true, course, classroom, start_day, end_day, meetings);
                 } else {
-                    owner.getClassInfoFromDB(false,null, null, null, null);
+                    owner.getClassInfoFromDB(false,null, null, null, null,null);
                 }
             }
         });
     }
 
-    // get meeting info by class id
+    /*/ get meeting info by class id
     public void getMeetingsOfClass(final AddClassContent owner, final String id){
         FirebaseFirestore database = MyGlobal.getInstance().gDB;
         database.collection("meetings")
@@ -530,6 +538,36 @@ public class DBManager {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         owner.getMeetingInfoFromDB(true, null);
+                    }
+                });
+    }*/
+
+    // add a class to teacher account
+    public void ModifyClassOfTeacher(String classID, String course, String classroom, String startDay, String endDay,
+                                  final ArrayList<MeetingOfClass> meetingList){
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser == null)
+            return;
+        DocumentReference classes = database.collection("classes").document(classID);
+
+        CollectionReference meeting = classes.collection("meetings");
+        classes.update("course", course);
+        classes.update("classroom", classroom);
+        classes.update("start_day", startDay);
+        classes.update("end_day", endDay);
+        classes.update("meetings",meetingList)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isSuccessful()) {
+                            //Log.d("DBManager ===>", "modified class");
+                            Handler handler = MyGlobal.getInstance().handlerCourseListAcitviey;
+                            Message msg = Message.obtain();
+                            msg.arg1 = CourseListActivity.MsgType_FreshList;
+                            handler.sendMessage(msg);
+                        } else {
+                            Log.d("DBManager", "Error: fail to add user to class", task.getException());
+                        }
                     }
                 });
     }
