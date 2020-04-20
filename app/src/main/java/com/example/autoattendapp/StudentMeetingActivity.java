@@ -17,19 +17,22 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 public class StudentMeetingActivity extends AppCompatActivity {
 
-    final TextView dateText = findViewById(R.id.dateText);
-    final TextView inText = findViewById(R.id.inText);
-    final TextView outText = findViewById(R.id.outText);
-    final TextView durationText = findViewById(R.id.durText);
-    final TextView attendText = findViewById(R.id.attendText);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_meeting);
-        setTitle("Meeting");
+
+        final TextView inText = findViewById(R.id.inText);
+        final TextView outText = findViewById(R.id.outText);
+        final TextView durationText = findViewById(R.id.durText);
+        final TextView attendText = findViewById(R.id.attendText);
+
+        //TODO: get these from selected meeting date as extras
         String classID = "1234";
         final String date = "04/19/2020";
+        setTitle(date);
 
         final FirebaseFirestore database = FirebaseFirestore.getInstance();
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -48,12 +51,11 @@ public class StudentMeetingActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                dateText.setText(date);
                                 inText.setText((String) document.get("timeIn"));
                                 outText.setText((String) document.get("timeOut"));
                                 //TODO fix these
-                                durationText.setText((String) document.get(""));
-                                attendText.setText((String) document.get(""));
+                                durationText.setText("duration");
+                                attendText.setText("attended");
                             }
                         } else {
                             Log.d("database", "Error getting documents: ", task.getException());
