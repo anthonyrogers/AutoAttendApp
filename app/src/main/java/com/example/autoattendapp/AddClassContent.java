@@ -213,15 +213,11 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
             public void onClick(View view) {
                 //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 //        .setAction("Action", null).show();
-                if(mClassId == null) {
+                if(mClassId == null)
                     addClass_onClick();
-                    finish();
-                }else{
+                else{
                     if(addClassgBtn.getText().toString().equals("Modify"))
-                    {
                         addClass_onClick();
-                        finish();
-                    }
                     else
                         startClass_onClick();
                 }
@@ -345,42 +341,102 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
         MeetingOfClass meeting;
         String weekday = spinWeekDay1.getSelectedItem().toString();
         if(weekday.length() > 0) {
+            String startTime = etStartTime1.getText().toString();
+            if (startTime.length() == 0) {
+                Snackbar.make(getCurrentFocus(), "start time cannot be empty", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return;
+            }
+            String endTime = etEndTime1.getText().toString();
+            if (endTime.length() == 0) {
+                Snackbar.make(getCurrentFocus(), "end time cannot be empty", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return;
+            }
             meeting = new MeetingOfClass();
             meeting.weekday = weekday;
-            meeting.startTime = etStartTime1.getText().toString();
-            meeting.endTime = etEndTime1.getText().toString();
+            meeting.startTime = startTime;
+            meeting.endTime = endTime;
             meetingList.add(meeting);
         }
         weekday = spinWeekDay2.getSelectedItem().toString();
         if(weekday.length() > 0) {
+            String startTime = etStartTime2.getText().toString();
+            if (startTime.length() == 0) {
+                Snackbar.make(getCurrentFocus(), "start time cannot be empty", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return;
+            }
+            String endTime = etEndTime2.getText().toString();
+            if (endTime.length() == 0) {
+                Snackbar.make(getCurrentFocus(), "end time cannot be empty", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return;
+            }
             meeting = new MeetingOfClass();
             meeting.weekday = weekday;
-            meeting.startTime = etStartTime2.getText().toString();
-            meeting.endTime = etEndTime2.getText().toString();
+            meeting.startTime = startTime;
+            meeting.endTime = endTime;
             meetingList.add(meeting);
         }
         weekday = spinWeekDay3.getSelectedItem().toString();
         if(weekday.length() > 0) {
+            String startTime = etStartTime3.getText().toString();
+            if (startTime.length() == 0) {
+                Snackbar.make(getCurrentFocus(), "start time cannot be empty", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return;
+            }
+            String endTime = etEndTime3.getText().toString();
+            if (endTime.length() == 0) {
+                Snackbar.make(getCurrentFocus(), "end time cannot be empty", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return;
+            }
             meeting = new MeetingOfClass();
             meeting.weekday = weekday;
-            meeting.startTime = etStartTime3.getText().toString();
-            meeting.endTime = etEndTime3.getText().toString();
+            meeting.startTime = startTime;
+            meeting.endTime = endTime;
             meetingList.add(meeting);
         }
         weekday = spinWeekDay4.getSelectedItem().toString();
         if(weekday.length() > 0) {
+            String startTime = etStartTime4.getText().toString();
+            if (startTime.length() == 0) {
+                Snackbar.make(getCurrentFocus(), "start time cannot be empty", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return;
+            }
+            String endTime = etEndTime4.getText().toString();
+            if (endTime.length() == 0) {
+                Snackbar.make(getCurrentFocus(), "end time cannot be empty", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return;
+            }
             meeting = new MeetingOfClass();
             meeting.weekday = weekday;
-            meeting.startTime = etStartTime4.getText().toString();
-            meeting.endTime = etEndTime4.getText().toString();
+            meeting.startTime = startTime;
+            meeting.endTime = endTime;
             meetingList.add(meeting);
         }
         weekday = spinWeekDay5.getSelectedItem().toString();
         if(weekday.length() > 0) {
+            String startTime = etStartTime5.getText().toString();
+            if (startTime.length() == 0) {
+                Snackbar.make(getCurrentFocus(), "start time cannot be empty", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return;
+            }
+            String endTime = etEndTime5.getText().toString();
+            if (endTime.length() == 0) {
+                Snackbar.make(getCurrentFocus(), "end time cannot be empty", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return;
+            }
             meeting = new MeetingOfClass();
             meeting.weekday = weekday;
-            meeting.startTime = etStartTime5.getText().toString();
-            meeting.endTime = etEndTime5.getText().toString();
+            meeting.startTime = startTime;
+            meeting.endTime = endTime;
             meetingList.add(meeting);
         }
         if(meetingList.size()==0) {
@@ -403,6 +459,7 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
                     mEndDayEText.getText().toString(),
                     meetingList);
         }
+        finish();
     }
 
     @Override
