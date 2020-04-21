@@ -58,6 +58,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     Context context;
     String classID;
     String className;
+    Boolean isStudentInClass;
     List<String> classbeaconlist;
     Map<String, Object> attendance;
 
@@ -105,6 +106,9 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
                     .build();
             startForeground(NOTIFICATION_ID, notification);
             doesDateExistForClass();
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            getStudentInformation(auth.getCurrentUser().getUid());
+            isStudentInClass = false;
         }else{
             stopSelf();
         }
@@ -186,7 +190,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     markAttendance(getCurrentDate(), task.getResult().getString("firstname"),
-                            task.getResult().getString("lastname"), getCurrentTime());
+                            task.getResult().getString("lastname"));
                 }
             }
         });
@@ -220,7 +224,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     }
     // marks the students attendance when they first hit the beacon
     // if they never hit the beacon, timeIn will be null
-    public void markAttendance(String date, String firstName, String lastName, String timeIn) {
+    public void markAttendance(String date, String firstName, String lastName) {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if(firebaseUser == null)
             return;
@@ -232,7 +236,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
         attendance.put("studentID", studentID);
         attendance.put("firstName", firstName);
         attendance.put("lastName", lastName);
-        attendance.put("timeIn", timeIn);
+        attendance.put("timeIn", null);
 
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         database.collection("attendance")
@@ -295,6 +299,48 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
                 });
     }
 
+    public void markTimeIn(String date, final String timeIn) {
+        final FirebaseFirestore database = FirebaseFirestore.getInstance();
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser == null)
+            return;
+        final String studentID = firebaseUser.getUid();
+
+        database.collection("attendance")
+                .whereEqualTo("studentID", studentID)
+                .whereEqualTo("classID", classID)
+                .whereEqualTo("date", date)
+                .limit(1)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String attendanceID = document.getId();
+                                DocumentReference attendanceRef = database.collection("attendance").document(attendanceID);
+                                attendanceRef
+                                        .update("timeIn", timeIn)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Log.d("time in", "logged");
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w("time in", "could not be logged", e);
+                                            }
+                                        });
+                            }
+                        } else {
+                            Log.d("database", "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+    }
+
     //notification channels are needed in newer android OS. It allows the user to go under the settings in an
     //app and change what notifications they want from our app. In this case, we just have one.
     //if the user were to turn off notifications from us, the service should still stay running.
@@ -315,7 +361,11 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     @Override
     public void onDestroy() {
         super.onDestroy();
-        markTimeOut(getCurrentDate(), getCurrentTime());
+        if(isStudentInClass) {
+            markTimeOut(getCurrentDate(), getCurrentTime());
+        }else{
+            markTimeOut(getCurrentDate(), null);
+        }
         Log.i("EXIT", "===> SERVICE DESTROYED!");
     }
 
@@ -351,7 +401,8 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
                         //the beacon calls
                         updateNotification(ACTIVE_TITLE + className, ACTIVE_CONTENT);
                         mBeaconManager.stopRangingBeaconsInRegion(region);
-                        getStudentInformation(firebaseUser.getUid());
+                        markTimeIn(getCurrentDate(), getCurrentTime());
+                        isStudentInClass = true;
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
