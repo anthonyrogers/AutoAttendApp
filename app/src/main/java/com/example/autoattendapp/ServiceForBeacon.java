@@ -18,6 +18,7 @@ import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Identifier;
+import org.altbeacon.beacon.MonitorNotifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import android.app.NotificationChannel;
@@ -45,8 +46,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.altbeacon.beacon.Identifier.fromUuid;
 
-public class ServiceForBeacon extends Service implements RangeNotifier, BeaconConsumer {
+
+public class ServiceForBeacon extends Service implements RangeNotifier, BeaconConsumer, MonitorNotifier {
 
     //if you have questions on service contact Anthony
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
@@ -55,19 +58,17 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     public static final int NOTIFICATION_ID = 23;
 
     BeaconManager mBeaconManager;
-    Context context;
     String classID;
     String className;
-    Boolean isStudentInClass;
+    String beaconID;
     List<String> classbeaconlist;
     Map<String, Object> attendance;
+    Boolean verifiedBeacon;
+    ArrayList<Map<String, String>> totalTime;
+    Map<String, String> sessionTime;
+    Region userRegion;
 
     public ServiceForBeacon(){}
-
-    public ServiceForBeacon(Context applicationContext) {
-        super();
-        this.context = applicationContext;
-    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -108,7 +109,8 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
             doesDateExistForClass();
             FirebaseAuth auth = FirebaseAuth.getInstance();
             getStudentInformation(auth.getCurrentUser().getUid());
-            isStudentInClass = false;
+            totalTime = new ArrayList<>();
+            verifiedBeacon = false;
         }else{
             stopSelf();
         }
@@ -159,6 +161,8 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
                     classbeaconlist = new ArrayList<>();
                     if (document.exists()) {
                         classbeaconlist.add(task.getResult().getString("beacon"));
+                        beaconID = task.getResult().getString("beacon");
+
                         Log.i("BEACON ID FROM TEACHER", task.getResult().getString("beacon"));
                     }
                 }
@@ -189,7 +193,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    markAttendance(getCurrentDate(), task.getResult().getString("firstname"),
+                    addStudentToAttendance(getCurrentDate(), task.getResult().getString("firstname"),
                             task.getResult().getString("lastname"));
                 }
             }
@@ -224,7 +228,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     }
     // marks the students attendance when they first hit the beacon
     // if they never hit the beacon, timeIn will be null
-    public void markAttendance(String date, String firstName, String lastName) {
+    public void addStudentToAttendance(String date, String firstName, String lastName) {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if(firebaseUser == null)
             return;
@@ -236,7 +240,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
         attendance.put("studentID", studentID);
         attendance.put("firstName", firstName);
         attendance.put("lastName", lastName);
-        attendance.put("timeIn", null);
+        attendance.put("times", new ArrayList<Map<String,String>>());
 
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         database.collection("attendance")
@@ -255,9 +259,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
                 });
     }
 
-    //finds the attendance document ID by date, classID, and studentID
-    //updates the document with the time out
-    public void markTimeOut(String date, final String timeOut) {
+    public void markTimeIn(String date) {
         final FirebaseFirestore database = FirebaseFirestore.getInstance();
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if(firebaseUser == null)
@@ -278,49 +280,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
                                 String attendanceID = document.getId();
                                 DocumentReference attendanceRef = database.collection("attendance").document(attendanceID);
                                 attendanceRef
-                                        .update("timeOut", timeOut)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("time out", "logged");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w("time out", "could not be logged", e);
-                                            }
-                                        });
-                            }
-                        } else {
-                            Log.d("database", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-    }
-
-    public void markTimeIn(String date, final String timeIn) {
-        final FirebaseFirestore database = FirebaseFirestore.getInstance();
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(firebaseUser == null)
-            return;
-        final String studentID = firebaseUser.getUid();
-
-        database.collection("attendance")
-                .whereEqualTo("studentID", studentID)
-                .whereEqualTo("classID", classID)
-                .whereEqualTo("date", date)
-                .limit(1)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                String attendanceID = document.getId();
-                                DocumentReference attendanceRef = database.collection("attendance").document(attendanceID);
-                                attendanceRef
-                                        .update("timeIn", timeIn)
+                                        .update("times", totalTime)
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
@@ -360,13 +320,38 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        if(isStudentInClass) {
-            markTimeOut(getCurrentDate(), getCurrentTime());
-        }else{
-            markTimeOut(getCurrentDate(), null);
-        }
+        //session time gets created only when the beacon is noticed
+      if(sessionTime != null){
+          //the session key gets recreated every time the re-enter into the beacon zone. if for some reason
+          //the class ended early (before service ends) or they never show back up, this will verify that the
+          //student has a timeout. if not, it will add the current timeout of when the service ends.
+          //meaning they were there the whole time.
+          if (sessionTime.containsKey("timeOut")) {
+              markTimeIn(getCurrentDate());
+          }else{
+              sessionTime.put("timeOut", getCurrentTime());
+              totalTime.add(sessionTime);
+              markTimeIn(getCurrentDate());
+          }
+          try {
+              mBeaconManager.stopMonitoringBeaconsInRegion(userRegion);
+          } catch (RemoteException e) {
+              e.printStackTrace();
+          }
+      }else{
+          sessionTime = new HashMap<>();
+          sessionTime.put("timeIn", null);
+          sessionTime.put("timeOut", null);
+          totalTime.add(sessionTime);
+          markTimeIn(getCurrentDate());
+          try {
+              mBeaconManager.stopRangingBeaconsInRegion(userRegion);
+          } catch (RemoteException e) {
+              e.printStackTrace();
+          }
+      }
         Log.i("EXIT", "===> SERVICE DESTROYED!");
+        super.onDestroy();
     }
 
     @Override
@@ -380,11 +365,14 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
         try {
             // Tells the BeaconService to start looking for beacons that match the passed Region object
             mBeaconManager.startRangingBeaconsInRegion(region);
+            mBeaconManager.startMonitoringBeaconsInRegion(region);
+            userRegion = region;
         } catch (RemoteException e) {
             e.printStackTrace();
         }
         // Specifies a class that should be called each time the BeaconService gets ranging data, once per second by default
         mBeaconManager.addRangeNotifier(this);
+        mBeaconManager.addMonitorNotifier(this);
         Log.i("BEACON CONNECT SERVICE", "CALLED");
     }
 
@@ -400,9 +388,10 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
                         //it will update the notification saying the student is in class and then stop
                         //the beacon calls
                         updateNotification(ACTIVE_TITLE + className, ACTIVE_CONTENT);
+                        verifiedBeacon = true;
                         mBeaconManager.stopRangingBeaconsInRegion(region);
-                        markTimeIn(getCurrentDate(), getCurrentTime());
-                        isStudentInClass = true;
+                        sessionTime = new HashMap<>();
+                        sessionTime.put("timeIn", getCurrentTime());
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -412,5 +401,31 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
                 }
             }
         }
+    }
+
+    private void checkBeacons(){
+
+    }
+    @Override
+    public void didEnterRegion(Region region) {
+        if(verifiedBeacon) {
+            sessionTime = new HashMap<>();
+            sessionTime.put("timeIn", getCurrentTime());
+            Log.i("BEACON ====>", "ENTERED REGION" + getCurrentTime());
+        }
+    }
+
+    @Override
+    public void didExitRegion(Region region) {
+        if(verifiedBeacon) {
+           sessionTime.put("timeOut", getCurrentTime());
+           totalTime.add(sessionTime);
+            Log.i("BEACON ====>", "EXITED REGION" + getCurrentTime());
+        }
+    }
+
+    @Override
+    public void didDetermineStateForRegion(int i, Region region) {
+
     }
 }
