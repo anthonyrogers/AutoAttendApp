@@ -316,9 +316,6 @@ public class DBManager {
                             SharedPreferences sharedPref = context.getSharedPreferences(INTENT_FILE_KEY, Context.MODE_PRIVATE);
                             sharedPref.edit().putString(classID, requestcode + "").apply();
                             Log.i("SHARED PREF SAVED",  sharedPref.getString(classID, null));
-
-
-
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
