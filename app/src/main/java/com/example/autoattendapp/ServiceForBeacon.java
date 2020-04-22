@@ -57,12 +57,12 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     public static final String ACTIVE_CONTENT = "Notification will cancel when class is over";
     public static final int NOTIFICATION_ID = 23;
 
+    final FirebaseAuth firebaseUser = FirebaseAuth.getInstance();
+    final FirebaseFirestore database = FirebaseFirestore.getInstance();
+
     BeaconManager mBeaconManager;
-    String classID;
-    String className;
-    String beaconID;
+    String classID, className, beaconID;
     List<String> classbeaconlist;
-    Map<String, Object> attendance;
     Boolean verifiedBeacon;
     ArrayList<Map<String, String>> totalTime;
     Map<String, String> sessionTime;
@@ -83,7 +83,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
         String action = intent.getAction();
         if(action.equals("stop")){
             Log.i("SERVICE ==>", "ENDED");
-            // this is where the code will be to submit the student info to the db
             stopSelf();
         }else if(action.equals("start")){
             Log.i("SERVICE ==>", "STARTED");
@@ -91,7 +90,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
             //sets up the beacon manager for use with eddystone beacons
             mBeaconManager = BeaconManager.getInstanceForApplication(this);
             mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
-            // Binds this activity to the BeaconService
             mBeaconManager.bind(this);
 
             createNotificationChannel();
@@ -136,8 +134,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     //just did a database call in here for testing purposes and we can access it without the app running
     //will eventually move to DBManager. This grabs the name of the class to display to the user in the notification.
     public void getClassList() {
-        final FirebaseAuth firebaseUser = FirebaseAuth.getInstance();
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
         if(firebaseUser != null) {
             DocumentReference userRef = database.collection("classes").document(classID);
             userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -152,7 +148,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     }
     //gets the beacon id associated with current class
     public void getBeaconIds(String teacherId){
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
         database.collection("users").document(teacherId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -171,7 +166,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     }
 
     public void doesDateExistForClass(){
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
         database.collection("classes").document(classID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -187,8 +181,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     }
 
     public void getStudentInformation(final String studentid){
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
-        final FirebaseAuth firebaseUser = FirebaseAuth.getInstance();
         database.collection("users").document(studentid).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -213,7 +205,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     }
 
     public void addDateToPastClasses(final String date){
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
         DocumentReference userRef = database.collection("classes").document(classID);
         userRef.update(
                 "pastMeetings", FieldValue.arrayUnion(date)
@@ -229,12 +220,11 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     // marks the students attendance when they first hit the beacon
     // if they never hit the beacon, timeIn will be null
     public void addStudentToAttendance(String date, String firstName, String lastName) {
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if(firebaseUser == null)
             return;
         final String studentID = firebaseUser.getUid();
 
-        attendance = new HashMap<>();
+        Map<String, Object> attendance = new HashMap<>();
         attendance.put("classID", classID);
         attendance.put("date", date);
         attendance.put("studentID", studentID);
@@ -242,7 +232,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
         attendance.put("lastName", lastName);
         attendance.put("times", new ArrayList<Map<String,String>>());
 
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
         database.collection("attendance")
                 .add(attendance)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -260,14 +249,10 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     }
 
     public void markTimeIn(String date) {
-        final FirebaseFirestore database = FirebaseFirestore.getInstance();
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if(firebaseUser == null)
             return;
-        final String studentID = firebaseUser.getUid();
-
         database.collection("attendance")
-                .whereEqualTo("studentID", studentID)
+                .whereEqualTo("studentID", firebaseUser.getCurrentUser().getUid())
                 .whereEqualTo("classID", classID)
                 .whereEqualTo("date", date)
                 .limit(1)
@@ -378,7 +363,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
 
     @Override
     public void didRangeBeaconsInRegion(Collection<Beacon> collection, Region region) {
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (collection.size() > 0) {
             Log.i("BEACON", collection.iterator().next().getIdentifier(0).toString());
             for(String beacon : classbeaconlist) {
@@ -403,9 +387,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
         }
     }
 
-    private void checkBeacons(){
-
-    }
     @Override
     public void didEnterRegion(Region region) {
         if(verifiedBeacon) {
@@ -426,6 +407,6 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
 
     @Override
     public void didDetermineStateForRegion(int i, Region region) {
-
+    //required override but not used in our app
     }
 }

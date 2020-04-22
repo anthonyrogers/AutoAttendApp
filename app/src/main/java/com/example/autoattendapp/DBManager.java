@@ -26,8 +26,15 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.text.ParseException;
@@ -316,8 +323,10 @@ public class DBManager {
                             //We only need to store one request code id for both start and end intents because we
                             //set and a different action to each one which makes that intent filterable and unique
                             SharedPreferences sharedPref = context.getSharedPreferences(INTENT_FILE_KEY, Context.MODE_PRIVATE);
-                            sharedPref.edit().putString(classID, requestcode + "").apply();
-                            Log.i("SHARED PREF SAVED",  sharedPref.getString(classID, null));
+                            Set<String> set = new HashSet<>(sharedPref.getStringSet(classID, new HashSet<String>()));
+                            set.add(requestcode + "");
+                            sharedPref.edit().putStringSet(classID,set).apply();
+
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
@@ -511,30 +520,6 @@ public class DBManager {
         return String.join("/", month, day, year);
     }
 
-    /*/ add a meeting to its class
-    private void addMeetingsToClass(String classId, String weekday, String starttime,String endtime){
-        ArrayList<String> meetingIDs = new ArrayList<String>();
-        Map<String, Object> mapMeeting = new HashMap<>();
-        mapMeeting.put("classId", classId);
-        mapMeeting.put("weekday", weekday);
-        mapMeeting.put("start_time", starttime);
-        mapMeeting.put("end_time", endtime);
-        database.collection("meetings")
-                .add(mapMeeting)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d("addClassToTeacher ==>","added a mapMeeting.");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("addClassToTeacher ==>", "Error: fail to adding mapMeeting", e);
-                    }
-                });
-    }*/
-
     /*
      * for course list only ========================================================================
      */
@@ -599,38 +584,6 @@ public class DBManager {
         });
     }
 
-    /*/ get meeting info by class id
-    public void getMeetingsOfClass(final AddClassContent owner, final String id){
-        FirebaseFirestore database = MyGlobal.getInstance().gDB;
-        database.collection("meetings")
-                .whereEqualTo("classId", id)
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot documentSnapshots) {
-                        String weekday ="", startTime="", endTime="";
-                        List<AddClassContent.MeetingInfo> list = new ArrayList<AddClassContent.MeetingInfo>();
-                        AddClassContent.MeetingInfo meetingInfo;
-                        for (QueryDocumentSnapshot snap : documentSnapshots) {
-                            Log.d("Get meeting ====>", snap.getId() + " => " + snap.getData());
-                            weekday = snap.getData().get("weekday").toString();
-                            startTime = snap.getData().get("start_time").toString();
-                            endTime = snap.getData().get("end_time").toString();
-                            meetingInfo = new AddClassContent.MeetingInfo(weekday,startTime,endTime);
-                            list.add(meetingInfo);
-                        }
-                        owner.getMeetingInfoFromDB(true, list);
-
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        owner.getMeetingInfoFromDB(true, null);
-                    }
-                });
-    }*/
-
     // add a class to teacher account
     public void ModifyClassOfTeacher(String classID, String course, String classroom, String startDay, String endDay,
                                   final ArrayList<MeetingOfClass> meetingList){
@@ -691,32 +644,35 @@ public class DBManager {
 
     }
 
-    public void deleteClassStudent(String classID, Context context) {
+    public void deleteClassStudent(String classID, Context context){
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         final String userUid = firebaseUser.getUid();
 
         deleteClassFromUser(classID, userUid);
         deleteStudentFromClass(classID, userUid);
 
-        //everything below will removed the pending intents from each class that are saved in shared pref
+
+        //this is retrieving the Intent unique ids that were created when the student added the class
+        //and this will tell the system to no longer send those pending intents.
         SharedPreferences sharedPref = context.getSharedPreferences(INTENT_FILE_KEY, Context.MODE_PRIVATE);
-        String savedIntent = sharedPref.getString(classID, null);
+        Set<String> set = new HashSet<>(sharedPref.getStringSet(classID, new HashSet<String>()));
+        for(String str : set){
+            AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(context, ServiceForBeacon.class);
+            intent.putExtra("ClassID", classID);
+            intent.setAction("stop");
+            PendingIntent pi2 = PendingIntent.getForegroundService(context, Integer.parseInt(str), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+            pi2.cancel();
+            am.cancel(pi2);
 
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, ServiceForBeacon.class);
-        intent.putExtra("ClassID", classID);
-        intent.setAction("stop");
-        PendingIntent pi2 = PendingIntent.getForegroundService(context, Integer.parseInt(savedIntent), intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        pi2.cancel();
-        am.cancel(pi2);
-
-        Intent intent2 = new Intent(context, ServiceForBeacon.class);
-        intent2.putExtra("ClassID", classID);
-        intent2.setAction("start");
-        PendingIntent pi = PendingIntent.getForegroundService(context, Integer.parseInt(savedIntent), intent2, PendingIntent.FLAG_CANCEL_CURRENT);
-        pi.cancel();
-        am.cancel(pi);
-        Log.i("INTENTS CANCELED", "FOR " + classID + " CLASS");
+            Intent intent2 = new Intent(context, ServiceForBeacon.class);
+            intent2.putExtra("ClassID", classID);
+            intent2.setAction("start");
+            PendingIntent pi = PendingIntent.getForegroundService(context, Integer.parseInt(str), intent2, PendingIntent.FLAG_CANCEL_CURRENT);
+            pi.cancel();
+            am.cancel(pi);
+            Log.i("INTENTS CANCELED", "FOR " + classID + " CLASS");
+        }
     }
 
     public void deleteClassFromUser(String classID, String userID) {
@@ -790,38 +746,7 @@ public class DBManager {
         });
     }
 
-    // marks the students attendance when they first hit the beacon
-    // if they never hit the beacon, timeIn will be null
-    public void markAttendance(String classID, String date, String firstName, String lastName, String timeIn) {
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(firebaseUser == null)
-            return;
-        final String studentID = firebaseUser.getUid();
 
-        Map<String, Object> attendance = new HashMap<>();
-        attendance.put(CLASS_ID, classID);
-        attendance.put(DATE, date);
-        attendance.put(STUDENT_ID, studentID);
-        attendance.put(FIRST_NAME, firstName);
-        attendance.put(LAST_NAME, lastName);
-        attendance.put(TIME_IN, timeIn);
-
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
-        database.collection(DOC_ATTEND)
-                .add(attendance)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d("addAttendance ==>","added an attendance.");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("addAttendance ==>", "Error: fail to adding attendance", e);
-                    }
-                });
-    }
 
     /**
      * This method retrieves a list of students and their attendances from a given
@@ -865,6 +790,7 @@ public class DBManager {
                 });
     }
 
+
     /**
      * This function gets a List of past meetings and sends the resulting
      * arraylist to the calling handler
@@ -872,6 +798,7 @@ public class DBManager {
      * @param handler - callback handler to send List of past meetings on success
      * @param classID - the class to get the past meetings
      */
+
     public void getDateListForClass(final Handler handler, final String classID) {
         database.collection(DOC_CLASSES).document(classID)
                 .get()
