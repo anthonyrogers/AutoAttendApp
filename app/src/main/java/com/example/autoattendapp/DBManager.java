@@ -824,6 +824,23 @@ public class DBManager {
                 });
     }
 
+    public void getStudentsAttendance(final Handler handler, List<String> students, String classID, String date) {
+
+        database.collection(DOC_ATTEND)
+                .whereEqualTo(DATE, date)
+                .whereEqualTo(CLASS_ID, classID)
+                .whereIn(STUDENT_ID, students)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        List<Attendance> attendances = new ArrayList<>();
+
+                    }
+                });
+
+    }
+
     //finds the attendance document ID by date and studentID
     //updates the document with the time out
     public void markTimeOut(String classID, String date, final String timeOut) {
