@@ -35,7 +35,6 @@
             android:label="@string/title_activity_add_class"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".AddClassContent" />
-        <activity android:name=".StudentActivity" />
         <activity android:name=".TeacherActivity" />
         <activity android:name=".CreateStudentAccount" />
         <activity android:name=".CreateTeacherAccount" />

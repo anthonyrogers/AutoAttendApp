@@ -46,6 +46,7 @@ import java.util.Set;
 public class DBManager {
 
     public static DBManager dbManager = null;
+    public static final int DB_ERROR = -1;
     FirebaseFirestore database;
 
     // define User db variables
@@ -173,7 +174,7 @@ public class DBManager {
                     handler.sendMessage(msg);
                 } else {
                     Message msg = Message.obtain();
-                    msg.arg1 = -1;
+                    msg.arg1 = DB_ERROR;
                     handler.sendMessage(msg);
                 }
             }
@@ -842,7 +843,7 @@ public class DBManager {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         Message msg = Message.obtain();
                         if(!task.isSuccessful()) {
-                            msg.what = -1;
+                            msg.what = DB_ERROR;
                             msg.obj = task.getException().toString();
                             handler.sendMessage(msg);
                             return;
@@ -871,21 +872,25 @@ public class DBManager {
      * @param handler - callback handler to send List of past meetings on success
      * @param classID - the class to get the past meetings
      */
-    public void getDateListForClass(final Handler handler, String classID) {
+    public void getDateListForClass(final Handler handler, final String classID) {
         database.collection(DOC_CLASSES).document(classID)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        Object[] handlerObjects = new Object[2];
                         Message msg = Message.obtain();
                         if(!task.isSuccessful()){
-                            msg.what = -1;
-                            msg.obj = task.getException().toString();
+                            msg.what = DB_ERROR;
+                            handler.sendMessage(msg);
                             return;
                         }
                         List<String> pastMeetings = (ArrayList<String>) task.getResult().get(PAST_MEETINGS);
+                        System.out.println(Arrays.toString(pastMeetings.toArray()));
                         msg.what = 1;
-                        msg.obj = pastMeetings;
+                        handlerObjects[0] = pastMeetings;
+                        handlerObjects[1] = classID;
+                        msg.obj = handlerObjects;
                         handler.sendMessage(msg);
                     }
                 });

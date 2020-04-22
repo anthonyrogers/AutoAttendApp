@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -54,6 +55,24 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
             } else {
                 Log.d("CourseListActivity msg Error", "Error? Handle.");
             }
+            return false;
+        }
+    });
+
+    Handler listDateClass = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            if(msg.what == DBManager.DB_ERROR) {
+                Toast.makeText(getApplicationContext(), "Failed to get past meetings", Toast.LENGTH_LONG).show();
+                return false;
+            }
+            Object[] response = (Object []) msg.obj;
+            ArrayList<String> pastMeetings = (ArrayList<String>) response[0];
+            String classID = (String) response[1];
+            Intent dateListActivity = new Intent(CourseListActivity.this, DateListActivity.class);
+            dateListActivity.putStringArrayListExtra(DateListActivity.INTENT_ARG, pastMeetings);
+            dateListActivity.putExtra(DateListActivity.CLASS_ID, classID);
+            startActivity(dateListActivity);
             return false;
         }
     });
@@ -149,7 +168,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
     // recycler view item click open the class
     @Override
     public void onItemClick(View view, int position) {
-        Intent intent = new Intent(CourseListActivity.this, AddClassContent.class);
+        //Intent intent = new Intent(CourseListActivity.this, AddClassContent.class);
 
         String classID = mAdapter.getClass(position).classID;
         Iterator<CourseRecyclerViewAdapter.ClassInfo> iter = mClassQueue.iterator();
@@ -163,8 +182,9 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
             Toast.makeText(this, "class info error.", Toast.LENGTH_SHORT).show();
             return;
         }
-        intent.putExtra("classId-view", classID);
-        startActivity(intent);
+        db.getDateListForClass(listDateClass, classID);
+        //intent.putExtra("classId-view", classID);
+        //startActivity(intent);
     }
 
     @Override
