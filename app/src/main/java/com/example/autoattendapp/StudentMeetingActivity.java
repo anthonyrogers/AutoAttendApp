@@ -3,8 +3,11 @@ package com.example.autoattendapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -17,7 +20,10 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class StudentMeetingActivity extends AppCompatActivity {
 
@@ -28,14 +34,16 @@ public class StudentMeetingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_meeting);
 
-        final TextView inText = findViewById(R.id.inText);
-        final TextView outText = findViewById(R.id.outText);
+        final ListView timeList = findViewById(R.id.timeList);
         final TextView durationText = findViewById(R.id.durText);
         final TextView attendText = findViewById(R.id.attendText);
 
         //TODO: pass these from selected meeting date as extras
-        String classID = getIntent().getExtras().getString("classID");
-        final String date = getIntent().getExtras().getString("date");;
+        //String classID = getIntent().getExtras().getString("classID");
+        //final String date = getIntent().getExtras().getString("date");;
+
+        String classID = "zScqgJUNpxLDzbY2IgY8";
+        final String date = "04/22/2020";
         setTitle(date);
 
         final FirebaseFirestore database = FirebaseFirestore.getInstance();
@@ -55,37 +63,56 @@ public class StudentMeetingActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                String timeIn = (String) document.get("timeIn");
-                                String timeOut = (String) document.get("timeOut");
-                                inText.setText(timeIn);
-                                outText.setText(timeOut);
+                                ArrayList<Map<String, String>> totalTime = (ArrayList<Map<String, String>>) document.get("times");
+                                long total = 0;
+                                ArrayList<String> timestamps = new ArrayList<>();
 
-                                SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-                                Date in = null;
-                                try {
-                                    in = format.parse(timeIn);
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
+                                for(int i=0; i < totalTime.size(); i++) {
+                                    String timeIn = totalTime.get(i).get("timeIn");
+                                    String timeOut = totalTime.get(i).get("timeOut");
+                                    Log.d("timeIn", timeIn);
+                                    Log.d("timeOut", timeOut);
+                                    if(timeIn.equals(null) || timeOut.equals(null)) { break;}
+                                    timestamps.add("Time In: " + timeIn);
+                                    timestamps.add("Time Out: " + timeOut);
+
+                                    SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+                                    Date in = null;
+                                    try {
+                                        in = format.parse(timeIn);
+                                    } catch (ParseException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Date out = null;
+                                    try {
+                                        out = format.parse(timeOut);
+                                    } catch (ParseException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    long difference = out.getTime() - in.getTime();
+                                    difference = difference/1000/60;
+                                    total = total + difference;
                                 }
-                                Date out = null;
-                                try {
-                                    out = format.parse(timeOut);
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                                //Log.d("In:", String.valueOf(in));
-                                //Log.d("Out:", String.valueOf(out));
-                                long difference = out.getTime() - in.getTime();
-                                //Log.d("difference", out.getTime()+ "-" +in.getTime());
-                                //Log.d("Diff:", String.valueOf(difference));
-                                String dur = String.valueOf(difference/1000/60);
+
+                                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+                                        StudentMeetingActivity.this,
+                                        android.R.layout.simple_list_item_1,
+                                        timestamps);
+                                timeList.setAdapter(arrayAdapter);
+
+                                String dur = String.valueOf(total);
                                 durationText.setText(dur + " minutes");
-
-                                if(timeIn != null) {
-                                    attendText.setText("Yes");
+                                if (total == 0) {
+                                    attendText.setText("Absent");
                                 } else {
-                                    attendText.setText("No");
+                                    attendText.setText("Present");
                                 }
+
+
+
+
+
 
                             }
                         } else {
