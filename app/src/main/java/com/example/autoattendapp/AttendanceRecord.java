@@ -4,10 +4,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AttendanceRecord {
+public class AttendanceRecord implements Parcelable{
 
     private String classID;
     private String date;
@@ -24,6 +25,48 @@ public class AttendanceRecord {
         this.studentID = studentID;
         this.times = times;
     }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(classID);
+        dest.writeString(date);
+        dest.writeString(firstName);
+        dest.writeString(lastName);
+        dest.writeString(studentID);
+        dest.writeInt(times.size());
+        for(int i=0; i < times.size(); i++) {
+            dest.writeString(times.get(i).get(DBManager.TIME_IN));
+            dest.writeString(times.get(i).get(DBManager.TIME_OUT));
+        }
+    }
+
+    protected AttendanceRecord(Parcel in) {
+        in.writeString(classID);
+        in.writeString(date);
+        in.writeString(firstName);
+        in.writeString(lastName);
+        in.writeString(studentID);
+        int size = in.readInt();
+        times = new ArrayList<>();
+        for(int i=0; i < size; i++) {
+            Map<String, String> time = new HashMap<>();
+            time.put(DBManager.TIME_IN, in.readString());
+            time.put(DBManager.TIME_OUT, in.readString());
+            times.add(time);
+        }
+    }
+
+    public static Creator<AttendanceRecord> CREATOR = new Creator<AttendanceRecord>() {
+        @Override
+        public AttendanceRecord createFromParcel(Parcel source) {
+            return new AttendanceRecord(source);
+        }
+
+        @Override
+        public AttendanceRecord[] newArray(int size) {
+            return new AttendanceRecord[size];
+        }
+    };
 
     public String getClassID() {
         return classID;
@@ -47,5 +90,19 @@ public class AttendanceRecord {
 
     public List<Map<String, String>> getTimes() {
         return times;
+    }
+
+    @Override
+    public String toString() {
+        String s =  String.format("%s %s %s %s %s\n", classID, date, firstName, lastName, studentID);
+        for(Map<String, String> time: times) {
+            s += String.format("\nTime in: %s\nTime out: %s\n", time.get(DBManager.TIME_IN), time.get(DBManager.TIME_OUT));
+        }
+        return s;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 }

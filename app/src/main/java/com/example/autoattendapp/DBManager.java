@@ -83,6 +83,7 @@ public class DBManager {
     public final static String WEEKDAY = "weekday";
     public final static String TIME_IN = "timeIn";
     public final static String TIME_OUT = "timeOut";
+    public final static String TIMES = "times";
 
 
 
@@ -821,8 +822,16 @@ public class DBManager {
                 });
     }
 
+    /**
+     * This method retrieves a list of students and their attendances from a given
+     * class at a given time, and send the array to a handler on success
+     *
+     * @param handler - the callback handler used to send the result
+     * @param students - the list of student IDs
+     * @param classID - the id of the class being shown
+     * @param date - the date to show the attendances
+     */
     public void getStudentsAttendance(final Handler handler, List<String> students, String classID, String date) {
-
         database.collection(DOC_ATTEND)
                 .whereEqualTo(DATE, date)
                 .whereEqualTo(CLASS_ID, classID)
@@ -831,11 +840,55 @@ public class DBManager {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        List<Attendance> attendances = new ArrayList<>();
-
+                        Message msg = Message.obtain();
+                        if(!task.isSuccessful()) {
+                            msg.what = -1;
+                            msg.obj = task.getException().toString();
+                            handler.sendMessage(msg);
+                            return;
+                        }
+                        List<AttendanceRecord> attendances = new ArrayList<>();
+                        for(QueryDocumentSnapshot document: task.getResult()){
+                            String classID = (String) document.get(CLASS_ID);
+                            String date = (String) document.get(DATE);
+                            String firstName = (String) document.get(FIRST_NAME);
+                            String lastName = (String) document.get(LAST_NAME);
+                            String studentID = (String) document.get(STUDENT_ID);
+                            List<Map<String, String>> times = (ArrayList<Map<String, String>>) document.get(TIMES);
+                            attendances.add(new AttendanceRecord(classID, date, firstName, lastName, studentID, times));
+                        }
+                        msg.what = 1;
+                        msg.obj = attendances;
+                        handler.sendMessage(msg);
                     }
                 });
+    }
 
+    /**
+     * This function gets a List of past meetings and sends the resulting
+     * arraylist to the calling handler
+     *
+     * @param handler - callback handler to send List of past meetings on success
+     * @param classID - the class to get the past meetings
+     */
+    public void getDateListForClass(final Handler handler, String classID) {
+        database.collection(DOC_CLASSES).document(classID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        Message msg = Message.obtain();
+                        if(!task.isSuccessful()){
+                            msg.what = -1;
+                            msg.obj = task.getException().toString();
+                            return;
+                        }
+                        List<String> pastMeetings = (ArrayList<String>) task.getResult().get(PAST_MEETINGS);
+                        msg.what = 1;
+                        msg.obj = pastMeetings;
+                        handler.sendMessage(msg);
+                    }
+                });
     }
 
     //finds the attendance document ID by date and studentID
