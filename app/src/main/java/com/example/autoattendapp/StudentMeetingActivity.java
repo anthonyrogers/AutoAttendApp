@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -14,6 +15,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -42,8 +44,8 @@ public class StudentMeetingActivity extends AppCompatActivity {
         //String classID = getIntent().getExtras().getString("classID");
         //final String date = getIntent().getExtras().getString("date");;
 
-        String classID = "zScqgJUNpxLDzbY2IgY8";
-        final String date = "04/22/2020";
+        final String classID = "RJhAZsxZn5HqdMwJWwD8";
+        final String date = "Mon, 04/22/2020";
         setTitle(date);
 
         final FirebaseFirestore database = FirebaseFirestore.getInstance();
@@ -68,11 +70,14 @@ public class StudentMeetingActivity extends AppCompatActivity {
                                 ArrayList<String> timestamps = new ArrayList<>();
 
                                 for(int i=0; i < totalTime.size(); i++) {
+                                    if(totalTime.get(i).get("timeIn") == null || totalTime.get(i).get("timeOut") == null) {
+                                        break;
+                                    }
                                     String timeIn = totalTime.get(i).get("timeIn");
                                     String timeOut = totalTime.get(i).get("timeOut");
                                     Log.d("timeIn", timeIn);
                                     Log.d("timeOut", timeOut);
-                                    if(timeIn.equals(null) || timeOut.equals(null)) { break;}
+
                                     timestamps.add("Time In: " + timeIn);
                                     timestamps.add("Time Out: " + timeOut);
 
@@ -94,6 +99,7 @@ public class StudentMeetingActivity extends AppCompatActivity {
                                     difference = difference/1000/60;
                                     total = total + difference;
                                 }
+                                final long finalTotal = total;
 
                                 ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                                         StudentMeetingActivity.this,
@@ -103,16 +109,40 @@ public class StudentMeetingActivity extends AppCompatActivity {
 
                                 String dur = String.valueOf(total);
                                 durationText.setText(dur + " minutes");
+
+                                database.collection("classes").document(classID)
+                                        .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            Map<String, String> durationMap = (Map<String, String>) task.getResult().get("duration");
+                                            assert durationMap != null;
+                                            String dayOfWeek = date.substring(0, 3);
+                                            Log.d ("Day", dayOfWeek);
+                                            String classDuration = durationMap.get(dayOfWeek);
+                                            Long classDur = Long.parseLong(classDuration);
+                                            Double percentage = Double.valueOf(finalTotal) / Double.valueOf(classDur) * 100;
+                                            Log.d ("Percent", String.valueOf(percentage) + " %");
+                                            String percent = String.valueOf(percentage);
+                                            if(percentage < 25) {
+                                                attendText.setText(percent + " %");
+                                                attendText.setTextColor(Color.RED);
+                                            } else if ((25 <= percentage) && (percentage <= 75)) {
+                                                attendText.setText(percent + " %");
+                                                attendText.setTextColor(Color.parseColor("#fcb603"));
+                                            } else {
+                                                attendText.setText(percent + " %");
+                                                attendText.setTextColor(Color.GREEN);
+                                            }
+                                        } else {
+                                            Log.d("Database", "error getting duration");
+                                        }
+                                    }
+                                });
                                 if (total == 0) {
                                     attendText.setText("Absent");
-                                } else {
-                                    attendText.setText("Present");
+                                    attendText.setTextColor(Color.RED);
                                 }
-
-
-
-
-
 
                             }
                         } else {
