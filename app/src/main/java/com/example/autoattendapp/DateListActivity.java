@@ -38,47 +38,9 @@ public class DateListActivity extends AppCompatActivity {
             classID = current.getStringExtra(CLASS_ID);
             dateRecyclerView = findViewById(R.id.dateRecyclerView);
             dateRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-            dateRecyclerView.setAdapter(new DateRecyclerViewAdapter(classTimes));
+            dateRecyclerView.setAdapter(new DateRecyclerViewAdapter(this, classTimes));
         }
         course = current.getStringExtra(COURSE);
         setTitle(course);
-    }
-
-    private class DateRecyclerViewAdapter extends RecyclerView.Adapter<DateRecyclerViewAdapter.ViewHolder> {
-        List<String> pastMeetings;
-
-
-        public DateRecyclerViewAdapter(List<String> pastMeetings) {
-            this.pastMeetings = pastMeetings;
-        }
-        @NonNull
-        @Override
-        public DateRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(getApplicationContext()).inflate(R.layout.daterecyclerview_row, parent,false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull DateRecyclerViewAdapter.ViewHolder holder, int position) {
-            String date = pastMeetings.get(position);
-            System.out.println(date);
-            holder.textViewName.setText(date);
-        }
-
-        @Override
-        public int getItemCount() {
-            return pastMeetings.size();
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public TextView textViewName;
-            ViewHolder(View itemView) {
-                super(itemView);
-                textViewName = itemView.findViewById(R.id.tvDeviceName);
-            }
-        }
-
-
-
     }
 }
