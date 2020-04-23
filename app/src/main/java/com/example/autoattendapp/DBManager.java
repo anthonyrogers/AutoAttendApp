@@ -12,6 +12,7 @@ import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.transition.Transition;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -370,7 +371,7 @@ public class DBManager {
         if(firebaseUser == null)
             return;
         final String userUid = firebaseUser.getUid();
-        final Map<String, Object> mapClass = new HashMap<>();
+        final Map<String, Object> mapClass = new HashMap<String, Object>();
         mapClass.put(COURSE, course);
         mapClass.put(CLASSROOM, classroom);
         mapClass.put(START_DAY, startDay);
@@ -379,6 +380,34 @@ public class DBManager {
         mapClass.put(TEACH_ID, userUid);
         mapClass.put(CLASS_MTGS, meetingList);
         mapClass.put(PAST_MEETINGS, new ArrayList<String>());
+        Log.d("size", String.valueOf(meetingList.size()));
+        Log.d("day", meetingList.get(0).weekday);
+
+        //map of weekday to duration
+        Map<String, String> duration = new HashMap<>();
+        for (int i = 0; i < meetingList.size(); i++) {
+            MeetingOfClass meeting = meetingList.get(i);
+            String weekday = meeting.weekday;
+            String weekdayAbbreviation = weekday.substring(0, 3);
+            SimpleDateFormat format = new SimpleDateFormat("HH:mm aa");
+            Date in = null;
+            try {
+                in = format.parse(meeting.startTime);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            Date out = null;
+            try {
+                out = format.parse(meeting.endTime);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            long difference = out.getTime() - in.getTime();
+            difference = difference/1000/60;
+            Log.d("Difference", String.valueOf(difference));
+            duration.put(weekdayAbbreviation, String.valueOf(difference));
+        }
+        mapClass.put("duration", duration);
 
         //generate class code
         final int min = 100000;
@@ -591,12 +620,35 @@ public class DBManager {
         if(firebaseUser == null)
             return;
         DocumentReference classes = database.collection(DOC_CLASSES).document(classID);
-
+        Map<String, String> duration = new HashMap<>();
+        for (int i = 0; i < meetingList.size(); i++) {
+            MeetingOfClass meeting = meetingList.get(i);
+            String weekday = meeting.weekday;
+            String weekdayAbbreviation = weekday.substring(0, 3);
+            SimpleDateFormat format = new SimpleDateFormat("HH:mm aa");
+            Date in = null;
+            try {
+                in = format.parse(meeting.startTime);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            Date out = null;
+            try {
+                out = format.parse(meeting.endTime);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            long difference = out.getTime() - in.getTime();
+            difference = difference/1000/60;
+            Log.d("Difference", String.valueOf(difference));
+            duration.put(weekdayAbbreviation, String.valueOf(difference));
+        }
         CollectionReference meeting = classes.collection(CLASS_MTGS);
         classes.update(COURSE, course);
         classes.update(CLASSROOM, classroom);
         classes.update(START_DAY, startDay);
         classes.update(END_DAY, endDay);
+        classes.update("duration", duration);
         classes.update(CLASS_MTGS, meetingList)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
