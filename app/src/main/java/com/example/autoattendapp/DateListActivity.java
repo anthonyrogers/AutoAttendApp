@@ -21,8 +21,11 @@ public class DateListActivity extends AppCompatActivity {
 
     public final static String INTENT_ARG = "intent_arg";
     public final static String CLASS_ID = "class_id";
+    public final static String COURSE = "course";
 
     RecyclerView dateRecyclerView;
+    String classID;
+    String course;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,15 +33,20 @@ public class DateListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_date_list);
         Intent current = getIntent();
         List<String> classTimes = current.getStringArrayListExtra(INTENT_ARG);
-        classTimes = Lists.reverse(classTimes);
-        String classID = current.getStringExtra(CLASS_ID);
-        dateRecyclerView = findViewById(R.id.dateRecyclerView);
-        dateRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        dateRecyclerView.setAdapter(new DateRecyclerViewAdapter(classTimes));
+        if(classTimes != null) {
+            classTimes = Lists.reverse(classTimes);
+            classID = current.getStringExtra(CLASS_ID);
+            dateRecyclerView = findViewById(R.id.dateRecyclerView);
+            dateRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+            dateRecyclerView.setAdapter(new DateRecyclerViewAdapter(classTimes));
+        }
+        course = current.getStringExtra(COURSE);
+        setTitle(course);
     }
 
     private class DateRecyclerViewAdapter extends RecyclerView.Adapter<DateRecyclerViewAdapter.ViewHolder> {
         List<String> pastMeetings;
+
 
         public DateRecyclerViewAdapter(List<String> pastMeetings) {
             this.pastMeetings = pastMeetings;
@@ -69,5 +77,8 @@ public class DateListActivity extends AppCompatActivity {
                 textViewName = itemView.findViewById(R.id.tvDeviceName);
             }
         }
+
+
+
     }
 }

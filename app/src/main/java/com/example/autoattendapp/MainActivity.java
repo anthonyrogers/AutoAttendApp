@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
                 //Intent teacherIntent = new Intent(MainActivity.this, TeacherActivity.class);
                 Intent teacherIntent = new Intent(MainActivity.this, CourseListActivity.class);
                 teacherIntent.putExtra("userType", "Teacher");
+                teacherIntent.putExtra("name", mAuth.getCurrentUser().getDisplayName());
                 startActivity(teacherIntent);
             } else if(msg.arg1 == User.STUDENT){
                 Intent studentIntent = new Intent(MainActivity.this, CourseListActivity.class);

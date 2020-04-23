@@ -16,9 +16,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -69,9 +73,11 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
             Object[] response = (Object []) msg.obj;
             ArrayList<String> pastMeetings = (ArrayList<String>) response[0];
             String classID = (String) response[1];
+            String course = (String) response[2];
             Intent dateListActivity = new Intent(CourseListActivity.this, DateListActivity.class);
             dateListActivity.putStringArrayListExtra(DateListActivity.INTENT_ARG, pastMeetings);
             dateListActivity.putExtra(DateListActivity.CLASS_ID, classID);
+            dateListActivity.putExtra(DateListActivity.COURSE, course);
             startActivity(dateListActivity);
             return false;
         }
@@ -83,10 +89,22 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
         setContentView(R.layout.activity_course_list);
 
         mUserType = getIntent().getExtras().getString("userType");
-        if(mUserType.equals("Teacher"))
+        /*if(mUserType.equals("Teacher"))
             setTitle("Course List (Teacher)");
         else
-            setTitle("Course List (Student)");
+            setTitle("Course List (Student)");*/
+        //set user's name as title
+        final FirebaseFirestore database = FirebaseFirestore.getInstance();
+        database.collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful() && task.getResult() != null) {
+                    setTitle(task.getResult().getString("firstname") + " " + task.getResult().getString("lastname"));
+                } else {
+                }
+            }
+        });
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         mAddButton = findViewById(R.id.buttonAddCourse);
         mAddButton.setOnClickListener(new View.OnClickListener() {

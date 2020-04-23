@@ -857,7 +857,7 @@ public class DBManager {
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        Object[] handlerObjects = new Object[2];
+                        Object[] handlerObjects = new Object[3];
                         Message msg = Message.obtain();
                         if(!task.isSuccessful()){
                             msg.what = DB_ERROR;
@@ -865,10 +865,12 @@ public class DBManager {
                             return;
                         }
                         List<String> pastMeetings = (ArrayList<String>) task.getResult().get(PAST_MEETINGS);
-                        System.out.println(Arrays.toString(pastMeetings.toArray()));
+                        String className = (String) task.getResult().get(COURSE);
+                        //System.out.println(Arrays.toString(pastMeetings.toArray()));
                         msg.what = 1;
                         handlerObjects[0] = pastMeetings;
                         handlerObjects[1] = classID;
+                        handlerObjects[2] = className;
                         msg.obj = handlerObjects;
                         handler.sendMessage(msg);
                     }
