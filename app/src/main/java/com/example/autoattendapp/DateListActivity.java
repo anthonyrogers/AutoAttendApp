@@ -46,7 +46,7 @@ public class DateListActivity extends AppCompatActivity {
         @NonNull
         @Override
         public DateRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(getApplicationContext()).inflate(R.layout.recyclerview_row, parent,false);
+            View view = LayoutInflater.from(getApplicationContext()).inflate(R.layout.daterecyclerview_row, parent,false);
             return new ViewHolder(view);
         }
 
