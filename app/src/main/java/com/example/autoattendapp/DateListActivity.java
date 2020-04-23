@@ -28,6 +28,7 @@ public class DateListActivity extends AppCompatActivity implements DateRecyclerV
     String classID;
     String course;
     String userType;
+    List<String> classTimes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +38,7 @@ public class DateListActivity extends AppCompatActivity implements DateRecyclerV
         course = current.getStringExtra(COURSE);
         userType = current.getStringExtra(USERTYPE);
         setTitle(course);
-        List<String> classTimes = current.getStringArrayListExtra(INTENT_ARG);
+        classTimes = current.getStringArrayListExtra(INTENT_ARG);
         if(classTimes != null) {
             classTimes = Lists.reverse(classTimes);
             classID = current.getStringExtra(CLASS_ID);
@@ -56,7 +57,7 @@ public class DateListActivity extends AppCompatActivity implements DateRecyclerV
         if (userType.equals("Student")) {
             intent = new Intent(DateListActivity.this, StudentMeetingActivity.class);
             intent.putExtra("classID", classID);
-            intent.putExtra("date", "Mon, 04/22/2020");
+            intent.putExtra("date", classTimes.get(position));
             startActivity(intent);
         } else {
 

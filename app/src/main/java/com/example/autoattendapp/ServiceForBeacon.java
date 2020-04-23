@@ -193,7 +193,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
     }
 
     private String getCurrentTime(){
-        DateFormat df = new SimpleDateFormat("h:mm a");
+        DateFormat df = new SimpleDateFormat("HH:mm");
         String date = df.format(Calendar.getInstance().getTime());
         return date;
     }
