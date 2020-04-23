@@ -41,11 +41,9 @@ public class StudentMeetingActivity extends AppCompatActivity {
         final TextView attendText = findViewById(R.id.attendText);
 
         //TODO: pass these from selected meeting date as extras
-        //String classID = getIntent().getExtras().getString("classID");
-        //final String date = getIntent().getExtras().getString("date");;
+        final String classID = getIntent().getExtras().getString("classID");
+        final String date = getIntent().getExtras().getString("date");;
 
-        final String classID = "RJhAZsxZn5HqdMwJWwD8";
-        final String date = "Mon, 04/22/2020";
         setTitle(date);
 
         final FirebaseFirestore database = FirebaseFirestore.getInstance();

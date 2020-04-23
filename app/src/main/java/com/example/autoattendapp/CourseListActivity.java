@@ -78,6 +78,7 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
             dateListActivity.putStringArrayListExtra(DateListActivity.INTENT_ARG, pastMeetings);
             dateListActivity.putExtra(DateListActivity.CLASS_ID, classID);
             dateListActivity.putExtra(DateListActivity.COURSE, course);
+            dateListActivity.putExtra(DateListActivity.USERTYPE, mUserType);
             startActivity(dateListActivity);
             return false;
         }
