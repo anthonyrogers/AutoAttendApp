@@ -456,7 +456,7 @@ public class DBManager {
                     }
                 });
         // add a meeting associated with the class
-        addSkeletonAttendance(myId, startDay, endDay, meetingList);
+        //addSkeletonAttendance(myId, startDay, endDay, meetingList);
     }
 
 
