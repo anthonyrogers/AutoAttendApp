@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcel;
 import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -55,6 +56,7 @@ public class DBManager {
 
     public static DBManager dbManager = null;
     public static final int DB_ERROR = -1;
+    public static final int DB_SUCCESS = 1;
     FirebaseFirestore database;
 
     // define User db variables
@@ -79,6 +81,7 @@ public class DBManager {
     public final static String START_DAY = "start_day";
     public final static String END_DAY = "end_day";
     public final static String TEACH_ID = "teachID";
+    public final static String DURATION = "duration";
     public final static String PAST_MEETINGS = "pastMeetings";
 
     // define attendance db variables
@@ -805,15 +808,13 @@ public class DBManager {
      * class at a given time, and send the array to a handler on success
      *
      * @param handler - the callback handler used to send the result
-     * @param students - the list of student IDs
      * @param classID - the id of the class being shown
      * @param date - the date to show the attendances
      */
-    public void getStudentsAttendance(final Handler handler, List<String> students, String classID, String date) {
+    public void getStudentsAttendance(final Handler handler, String classID, String date) {
         database.collection(DOC_ATTEND)
                 .whereEqualTo(DATE, date)
                 .whereEqualTo(CLASS_ID, classID)
-                .whereIn(STUDENT_ID, students)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -832,10 +833,10 @@ public class DBManager {
                             String firstName = (String) document.get(FIRST_NAME);
                             String lastName = (String) document.get(LAST_NAME);
                             String studentID = (String) document.get(STUDENT_ID);
-                            List<Map<String, String>> times = (ArrayList<Map<String, String>>) document.get(TIMES);
+                            ArrayList<Map<String, String>> times = (ArrayList<Map<String, String>>) document.get(TIMES);
                             attendances.add(new AttendanceRecord(classID, date, firstName, lastName, studentID, times));
                         }
-                        msg.what = 1;
+                        msg.what = DB_SUCCESS;
                         msg.obj = attendances;
                         handler.sendMessage(msg);
                     }
@@ -867,7 +868,7 @@ public class DBManager {
                         List<String> pastMeetings = (ArrayList<String>) task.getResult().get(PAST_MEETINGS);
                         String className = (String) task.getResult().get(COURSE);
                         //System.out.println(Arrays.toString(pastMeetings.toArray()));
-                        msg.what = 1;
+                        msg.what = DB_SUCCESS;
                         handlerObjects[0] = pastMeetings;
                         handlerObjects[1] = classID;
                         handlerObjects[2] = className;
@@ -875,6 +876,67 @@ public class DBManager {
                         handler.sendMessage(msg);
                     }
                 });
+    }
+
+
+    public void getClassDuration(final Handler handler, final String classID, final String date) {
+        database.collection(DOC_CLASSES).document(classID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        Message msg = Message.obtain();
+                        if(!task.isSuccessful()) {
+                            msg.what = DB_ERROR;
+                            handler.sendMessage(msg);
+                            return;
+                        }
+                        Map<String, String> durationMap = (Map<String, String>) task.getResult().get(DURATION);
+                        if(durationMap == null) {
+                            msg.what = DB_ERROR;
+                            handler.sendMessage(msg);
+                            return;
+                        }
+                        String dayOfWeek = date.substring(0, 3);
+                        String classDuration = durationMap.get(dayOfWeek);
+                        Long classDur = Long.parseLong(classDuration);
+                        msg.obj = classDur;
+                        msg.what = DB_SUCCESS;
+                        handler.sendMessage(msg);
+                    }
+                });
+    }
+
+    public static long getStudentDuration(ArrayList<Map<String, String>> totalTime) {
+        long total = 0;
+        for(int i=0; i < totalTime.size(); i++) {
+            if(totalTime.get(i).get("timeIn") == null || totalTime.get(i).get("timeOut") == null) {
+                break;
+            }
+            SimpleDateFormat displayFormat = new SimpleDateFormat("hh:mm a");
+            SimpleDateFormat parseFormat = new SimpleDateFormat("HH:mm");
+            String timeIn = totalTime.get(i).get(TIME_IN);
+            String timeOut = totalTime.get(i).get(TIME_OUT);
+
+            SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+            Date in = null;
+            try {
+                in = format.parse(timeIn);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            Date out = null;
+            try {
+                out = format.parse(timeOut);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            long difference = out.getTime() - in.getTime();
+            difference = difference/1000/60;
+            total = total + difference;
+        }
+        return total;
     }
 
     //finds the attendance document ID by date and studentID

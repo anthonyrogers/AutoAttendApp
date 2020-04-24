@@ -15,9 +15,9 @@ public class AttendanceRecord implements Parcelable{
     private String firstName;
     private String lastName;
     private String studentID;
-    private List<Map<String, String>> times;
+    private ArrayList<Map<String, String>> times;
 
-    public AttendanceRecord(String classID, String date, String firstName, String lastName, String studentID, List<Map<String, String>> times) {
+    public AttendanceRecord(String classID, String date, String firstName, String lastName, String studentID, ArrayList<Map<String, String>> times) {
         this.classID = classID;
         this.date = date;
         this.firstName = firstName;
@@ -41,11 +41,11 @@ public class AttendanceRecord implements Parcelable{
     }
 
     protected AttendanceRecord(Parcel in) {
-        in.writeString(classID);
-        in.writeString(date);
-        in.writeString(firstName);
-        in.writeString(lastName);
-        in.writeString(studentID);
+        classID = in.readString();
+        date = in.readString();
+        firstName = in.readString();
+        lastName = in.readString();
+        studentID = in.readString();
         int size = in.readInt();
         times = new ArrayList<>();
         for(int i=0; i < size; i++) {
@@ -88,7 +88,7 @@ public class AttendanceRecord implements Parcelable{
         return studentID;
     }
 
-    public List<Map<String, String>> getTimes() {
+    public ArrayList<Map<String, String>> getTimes() {
         return times;
     }
 

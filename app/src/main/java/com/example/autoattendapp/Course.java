@@ -13,7 +13,7 @@ public class Course implements Parcelable {
     private ArrayList<Student> students;
     private String classCode;
     private String courseName;
-    private HashMap<Student, List<StudentRecord>> studentRecords;
+    private HashMap<Student, List<AttendanceRecord>> studentRecords;
 
     public Course(Teacher teacher, ArrayList<Student> students, String classCode, String courseName) {
         this.teacher = teacher;
@@ -27,7 +27,7 @@ public class Course implements Parcelable {
         students = in.readArrayList(Student.class.getClassLoader());
         classCode = in.readString();
         courseName = in.readString();
-        studentRecords = (HashMap<Student, List<StudentRecord>>) in.readSerializable();
+        studentRecords = (HashMap<Student, List<AttendanceRecord>>) in.readSerializable();
     }
 
 

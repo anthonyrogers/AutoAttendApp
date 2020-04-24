@@ -7,13 +7,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -29,11 +34,30 @@ public class DateListActivity extends AppCompatActivity implements DateRecyclerV
     String course;
     String userType;
     List<String> classTimes;
+    DBManager dbManager;
+    private String date = null;
+
+    private Handler onStudentsRecordsReceived = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            if(msg.what == DBManager.DB_ERROR) {
+                Toast.makeText(getApplicationContext(), "Failed to get attendance records", Toast.LENGTH_LONG);
+            }
+            ArrayList<? extends Parcelable> attendanceRecords = (ArrayList<? extends Parcelable>) msg.obj;
+            Intent studentListActivityIntent = new Intent(DateListActivity.this, StudentListActivity.class);
+            studentListActivityIntent.putParcelableArrayListExtra(StudentListActivity.ATTENDANCE_ARG, attendanceRecords);
+            studentListActivityIntent.putExtra(StudentListActivity.CLASS_ID, classID);
+            studentListActivityIntent.putExtra(StudentListActivity.DATE, date);
+            startActivity(studentListActivityIntent);
+            return false;
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_date_list);
+        dbManager = DBManager.getInstance();
         Intent current = getIntent();
         course = current.getStringExtra(COURSE);
         userType = current.getStringExtra(USERTYPE);
@@ -60,7 +84,9 @@ public class DateListActivity extends AppCompatActivity implements DateRecyclerV
             intent.putExtra("date", classTimes.get(position));
             startActivity(intent);
         } else {
-
+            if(date != null) return;
+            dbManager.getStudentsAttendance(onStudentsRecordsReceived, classID, classTimes.get(position));
+            date = classTimes.get(position);
         }
 
     }
