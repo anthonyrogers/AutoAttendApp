@@ -279,7 +279,7 @@ public class DBManager {
                     for(HashMap<String, String> meeting : name){
                       //this is for the dates and creating pending intents for each class
                         SimpleDateFormat displayFormat = new SimpleDateFormat("HH:mm");
-                        SimpleDateFormat parseFormat = new SimpleDateFormat("hh:mma");
+                        SimpleDateFormat parseFormat = new SimpleDateFormat("hh:mm a");
                           /*  this block will convert the hours in the database to military time and then set a calendar
                               to that date which will be passed along to the alarm manager after creating the pending intnets
                               the first block is for the start time and the second block is for the endtime. I generate the
