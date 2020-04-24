@@ -20,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -71,13 +72,21 @@ public class StudentMeetingActivity extends AppCompatActivity {
                                     if(totalTime.get(i).get("timeIn") == null || totalTime.get(i).get("timeOut") == null) {
                                         break;
                                     }
+                                    SimpleDateFormat displayFormat = new SimpleDateFormat("hh:mm a");
+                                    SimpleDateFormat parseFormat = new SimpleDateFormat("HH:mm");
                                     String timeIn = totalTime.get(i).get("timeIn");
                                     String timeOut = totalTime.get(i).get("timeOut");
                                     Log.d("timeIn", timeIn);
                                     Log.d("timeOut", timeOut);
 
-                                    timestamps.add("Time In: " + timeIn);
-                                    timestamps.add("Time Out: " + timeOut);
+                                    try {
+                                        // just changed military time to standard 12 hour format so its easier to read by user
+                                        timestamps.add("Time In: " + displayFormat.format(parseFormat.parse(timeIn)));
+                                        timestamps.add("Time Out: " + displayFormat.format(parseFormat.parse(timeOut)));
+                                    } catch (ParseException e) {
+                                        e.printStackTrace();
+                                    }
+
 
                                     SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                                     Date in = null;
@@ -121,15 +130,16 @@ public class StudentMeetingActivity extends AppCompatActivity {
                                             Long classDur = Long.parseLong(classDuration);
                                             Double percentage = Double.valueOf(finalTotal) / Double.valueOf(classDur) * 100;
                                             Log.d ("Percent", String.valueOf(percentage) + " %");
-                                            String percent = String.valueOf(percentage);
+                                            DecimalFormat df = new DecimalFormat("#.##");
+                                            String percent = String.valueOf(df.format(percentage)) + " %";
                                             if(percentage < 25) {
-                                                attendText.setText(percent + " %");
+                                                attendText.setText(percent);
                                                 attendText.setTextColor(Color.RED);
                                             } else if ((25 <= percentage) && (percentage <= 75)) {
-                                                attendText.setText(percent + " %");
+                                                attendText.setText(percent);
                                                 attendText.setTextColor(Color.parseColor("#fcb603"));
                                             } else {
-                                                attendText.setText(percent + " %");
+                                                attendText.setText(percent);
                                                 attendText.setTextColor(Color.GREEN);
                                             }
                                         } else {
