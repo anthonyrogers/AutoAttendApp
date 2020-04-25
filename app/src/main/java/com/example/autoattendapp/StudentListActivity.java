@@ -56,6 +56,7 @@ public class StudentListActivity extends AppCompatActivity {
         classID = current.getStringExtra(CLASS_ID);
         recyclerView = findViewById(R.id.studentRecyclerView);
         dbManager = DBManager.getInstance();
+        setTitle(date);
         dbManager.getClassDuration(receiveClassDuration, classID, date);
     }
 

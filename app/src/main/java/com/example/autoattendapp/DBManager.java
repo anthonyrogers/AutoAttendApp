@@ -910,7 +910,7 @@ public class DBManager {
     public static long getStudentDuration(ArrayList<Map<String, String>> totalTime) {
         long total = 0;
         for(int i=0; i < totalTime.size(); i++) {
-            if(totalTime.get(i).get("timeIn") == null || totalTime.get(i).get("timeOut") == null) {
+            if(totalTime.get(i).get(TIME_IN) == null || totalTime.get(i).get(TIME_OUT) == null) {
                 break;
             }
             SimpleDateFormat displayFormat = new SimpleDateFormat("hh:mm a");
