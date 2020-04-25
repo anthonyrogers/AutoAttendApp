@@ -18,6 +18,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthActionCodeException;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 
 //import com.google.firebase.auth.AuthResult;
@@ -119,7 +122,14 @@ public class CreateTeacherAccount extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
                 if(e instanceof FirebaseAuthUserCollisionException){
+
                     Toast.makeText(getApplicationContext(), "Failed: Email already exists", Toast.LENGTH_LONG).show();
+                }
+                if(e instanceof FirebaseAuthInvalidCredentialsException){
+                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+                if(e instanceof FirebaseAuthInvalidUserException){
+                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             }
         });
