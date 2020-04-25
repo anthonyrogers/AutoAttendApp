@@ -33,8 +33,11 @@ public class MeetingOfClass {
         else if(weekday.equals(FRIDAY))
             return 5;
         else if(weekday.equals(SATURDAY))
-            return  6;
-        else
+            return 6;
+        else if(weekday.equals(SUNDAY))
             return 7;
+        else
+            return -1;
+
     }
 }
