@@ -958,7 +958,11 @@ public class DBManager {
                         }
                         String dayOfWeek = date.substring(0, 3);
                         String classDuration = durationMap.get(dayOfWeek);
-                        Long classDur = Long.parseLong(classDuration);
+                        //classDuration will be null, so add below code
+                        Long classDur = new Long(0);
+                        if(classDuration != null) {
+                            classDur = Long.parseLong(classDuration);
+                        }
                         msg.obj = classDur;
                         msg.what = DB_SUCCESS;
                         handler.sendMessage(msg);
