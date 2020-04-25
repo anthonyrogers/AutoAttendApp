@@ -37,6 +37,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Array;
+import java.text.DateFormat;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.text.ParseException;
@@ -288,6 +289,12 @@ public class DBManager {
                               unique ids for the request code of the intents and then save them in shared preferences. This will delete
                               the pending intents if a user removes the class from their list. */
                         try {
+                            Calendar now = Calendar.getInstance();
+                            now.set(Calendar.SECOND, 0);
+                            now.set(Calendar.MILLISECOND, 0);
+                            now.set(Calendar.DAY_OF_WEEK, Calendar.DAY_OF_WEEK);
+                           Log.i("CALENDAR DAY OF WEEK =====> ", Calendar.DAY_OF_WEEK + "");
+
                             Date date = parseFormat.parse(meeting.get(START_TIME));
                             String time[] = displayFormat.format(date).split(":");
                             Calendar calendar = Calendar.getInstance();
@@ -295,6 +302,9 @@ public class DBManager {
                             calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time[0]));
                             calendar.set(Calendar.MINUTE, Integer.parseInt(time[1]));
                             calendar.set(Calendar.DAY_OF_WEEK, findDayOfWeek(meeting.get(WEEKDAY)));
+                            if (calendar.before(now)) {    //this condition is used for future reminder that means your reminder not fire for past time
+                                calendar.add(Calendar.DATE, 7);
+                            }
                             int requestcode = generateRandomNumber();
 
                             //setup for startup time
@@ -315,6 +325,9 @@ public class DBManager {
                             calendar2.set(Calendar.MINUTE, Integer.parseInt(time2[1]));
                             calendar2.set(Calendar.DAY_OF_WEEK, findDayOfWeek(meeting.get(WEEKDAY)));
 
+                            if (calendar2.before(now)) {    //this condition is used for future reminder that means your reminder not fire for past time
+                                calendar2.add(Calendar.DATE, 7);
+                            }
 
                             Intent intent = new Intent(context, ServiceForBeacon.class);
                             intent.putExtra("ClassID", classID);
@@ -351,19 +364,19 @@ public class DBManager {
     private int findDayOfWeek(String dayOfWeek){
         switch (dayOfWeek) {
             case  MeetingOfClass.MONDAY:
-                return 1;
-            case MeetingOfClass.TUESDAY:
                 return 2;
-            case MeetingOfClass.WEDNESDAY:
+            case MeetingOfClass.TUESDAY:
                 return 3;
-            case MeetingOfClass.THURSDAY:
+            case MeetingOfClass.WEDNESDAY:
                 return 4;
-            case MeetingOfClass.FRIDAY:
+            case MeetingOfClass.THURSDAY:
                 return 5;
-            case MeetingOfClass.SATURDAY:
+            case MeetingOfClass.FRIDAY:
                 return 6;
-            case MeetingOfClass.SUNDAY:
+            case MeetingOfClass.SATURDAY:
                 return 7;
+            case MeetingOfClass.SUNDAY:
+                return 1;
             default:
                 return 0;
         }
