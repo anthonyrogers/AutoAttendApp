@@ -221,7 +221,6 @@ public class DBManager {
                                 String classID = document.getId();
                                 Log.d("ClassID", classID);
                                 addStudentToClass(classID, context);
-
                             }
                         } else {
                             Log.d("ClassCodeError", "Error getting documents: ", task.getException());
@@ -352,15 +351,19 @@ public class DBManager {
     private int findDayOfWeek(String dayOfWeek){
         switch (dayOfWeek) {
             case  MeetingOfClass.MONDAY:
-                return 2;
+                return 1;
             case MeetingOfClass.TUESDAY:
-                return 3;
+                return 2;
             case MeetingOfClass.WEDNESDAY:
-                return 4;
+                return 3;
             case MeetingOfClass.THURSDAY:
-                return 5;
+                return 4;
             case MeetingOfClass.FRIDAY:
+                return 5;
+            case MeetingOfClass.SATURDAY:
                 return 6;
+            case MeetingOfClass.SUNDAY:
+                return 7;
             default:
                 return 0;
         }
@@ -942,7 +945,11 @@ public class DBManager {
                         }
                         String dayOfWeek = date.substring(0, 3);
                         String classDuration = durationMap.get(dayOfWeek);
-                        Long classDur = Long.parseLong(classDuration);
+                        //classDuration will be null, so add below code
+                        Long classDur = new Long(0);
+                        if(classDuration != null) {
+                            classDur = Long.parseLong(classDuration);
+                        }
                         msg.obj = classDur;
                         msg.what = DB_SUCCESS;
                         handler.sendMessage(msg);
