@@ -23,19 +23,19 @@ public class MeetingOfClass {
 
     public static int getIndexOfWeekDay(String weekday){
         if(weekday.equals(MONDAY))
-            return 1;
-        else if(weekday.equals(TUESDAY))
             return 2;
-        else if(weekday.equals(WEDNESDAY))
+        else if(weekday.equals(TUESDAY))
             return 3;
-        else if(weekday.equals(THURSDAY))
+        else if(weekday.equals(WEDNESDAY))
             return 4;
-        else if(weekday.equals(FRIDAY))
+        else if(weekday.equals(THURSDAY))
             return 5;
-        else if(weekday.equals(SATURDAY))
+        else if(weekday.equals(FRIDAY))
             return 6;
-        else if(weekday.equals(SUNDAY))
+        else if(weekday.equals(SATURDAY))
             return 7;
+        else if(weekday.equals(SUNDAY))
+            return 1;
         else
             return -1;
 

@@ -292,6 +292,8 @@ public class DBManager {
                             Calendar now = Calendar.getInstance();
                             now.set(Calendar.SECOND, 0);
                             now.set(Calendar.MILLISECOND, 0);
+                            now.set(Calendar.DAY_OF_WEEK, Calendar.DAY_OF_WEEK);
+                           Log.i("CALENDAR DAY OF WEEK =====> ", Calendar.DAY_OF_WEEK + "");
 
                             Date date = parseFormat.parse(meeting.get(START_TIME));
                             String time[] = displayFormat.format(date).split(":");
@@ -351,12 +353,6 @@ public class DBManager {
             }
         });
     }
-    private String getCurrentDate(){
-        DateFormat df = new SimpleDateFormat("EEE, MM/dd/yyyy");
-        String date = df.format(Calendar.getInstance().getTime());
-        Log.i("CURRENT DATE", date);
-        return date;
-    }
     private int generateRandomNumber(){
         //this is for creating unique numbers for intents which we will keep track of - Anthony
         final int min = 100000;
@@ -368,19 +364,19 @@ public class DBManager {
     private int findDayOfWeek(String dayOfWeek){
         switch (dayOfWeek) {
             case  MeetingOfClass.MONDAY:
-                return 1;
-            case MeetingOfClass.TUESDAY:
                 return 2;
-            case MeetingOfClass.WEDNESDAY:
+            case MeetingOfClass.TUESDAY:
                 return 3;
-            case MeetingOfClass.THURSDAY:
+            case MeetingOfClass.WEDNESDAY:
                 return 4;
-            case MeetingOfClass.FRIDAY:
+            case MeetingOfClass.THURSDAY:
                 return 5;
-            case MeetingOfClass.SATURDAY:
+            case MeetingOfClass.FRIDAY:
                 return 6;
-            case MeetingOfClass.SUNDAY:
+            case MeetingOfClass.SATURDAY:
                 return 7;
+            case MeetingOfClass.SUNDAY:
+                return 1;
             default:
                 return 0;
         }
