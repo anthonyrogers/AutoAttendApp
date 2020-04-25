@@ -37,6 +37,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Array;
+import java.text.DateFormat;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.text.ParseException;
@@ -288,6 +289,10 @@ public class DBManager {
                               unique ids for the request code of the intents and then save them in shared preferences. This will delete
                               the pending intents if a user removes the class from their list. */
                         try {
+                            Calendar now = Calendar.getInstance();
+                            now.set(Calendar.SECOND, 0);
+                            now.set(Calendar.MILLISECOND, 0);
+
                             Date date = parseFormat.parse(meeting.get(START_TIME));
                             String time[] = displayFormat.format(date).split(":");
                             Calendar calendar = Calendar.getInstance();
@@ -295,6 +300,9 @@ public class DBManager {
                             calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time[0]));
                             calendar.set(Calendar.MINUTE, Integer.parseInt(time[1]));
                             calendar.set(Calendar.DAY_OF_WEEK, findDayOfWeek(meeting.get(WEEKDAY)));
+                            if (calendar.before(now)) {    //this condition is used for future reminder that means your reminder not fire for past time
+                                calendar.add(Calendar.DATE, 7);
+                            }
                             int requestcode = generateRandomNumber();
 
                             //setup for startup time
@@ -315,6 +323,9 @@ public class DBManager {
                             calendar2.set(Calendar.MINUTE, Integer.parseInt(time2[1]));
                             calendar2.set(Calendar.DAY_OF_WEEK, findDayOfWeek(meeting.get(WEEKDAY)));
 
+                            if (calendar2.before(now)) {    //this condition is used for future reminder that means your reminder not fire for past time
+                                calendar2.add(Calendar.DATE, 7);
+                            }
 
                             Intent intent = new Intent(context, ServiceForBeacon.class);
                             intent.putExtra("ClassID", classID);
@@ -339,6 +350,12 @@ public class DBManager {
                 }
             }
         });
+    }
+    private String getCurrentDate(){
+        DateFormat df = new SimpleDateFormat("EEE, MM/dd/yyyy");
+        String date = df.format(Calendar.getInstance().getTime());
+        Log.i("CURRENT DATE", date);
+        return date;
     }
     private int generateRandomNumber(){
         //this is for creating unique numbers for intents which we will keep track of - Anthony
