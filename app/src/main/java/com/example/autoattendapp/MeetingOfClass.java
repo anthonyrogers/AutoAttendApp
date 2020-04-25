@@ -38,5 +38,6 @@ public class MeetingOfClass {
             return 7;
         else
             return -1;
+
     }
 }
