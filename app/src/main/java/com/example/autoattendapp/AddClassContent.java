@@ -160,6 +160,8 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
         list.add(MeetingOfClass.WEDNESDAY);
         list.add(MeetingOfClass.THURSDAY);
         list.add(MeetingOfClass.FRIDAY);
+        list.add(MeetingOfClass.SATURDAY);
+        list.add(MeetingOfClass.SUNDAY);
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getApplicationContext(),
                 android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -287,6 +289,7 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
 
         for(int i=0; i<list.size(); i++){
             if(i==0){
+                Log.d("tes=========",list.get(i).weekday);
                 spinWeekDay1.setSelection(MeetingOfClass.getIndexOfWeekDay(list.get(i).weekday));
                 etStartTime1.setText(list.get(i).startTime);
                 etEndTime1.setText(list.get(i).endTime);
