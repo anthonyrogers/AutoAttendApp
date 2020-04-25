@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,133 +32,82 @@ import java.util.Map;
 public class StudentMeetingActivity extends AppCompatActivity {
 
 
+    private final String ABSENT = "absent";
+    private final String YELLOW = "#fcb603";
+
+    public final static String CLASS_DUR_ARG = "classDur";
+    public final static String ATTENDANCE_ARG = "attendance";
+    public final static String DATE_ARG = "date";
+
+    private Double classDur;
+    private AttendanceRecord record;
+    private String date;
+
+    ListView timeList;
+    TextView durationText;
+    TextView attendText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_meeting);
 
-        final ListView timeList = findViewById(R.id.timeList);
-        final TextView durationText = findViewById(R.id.durText);
-        final TextView attendText = findViewById(R.id.attendText);
+        Intent current = getIntent();
 
-        //TODO: pass these from selected meeting date as extras
-        final String classID = getIntent().getExtras().getString("classID");
-        final String date = getIntent().getExtras().getString("date");;
+        timeList = findViewById(R.id.timeList);
+        durationText = findViewById(R.id.durText);
+        attendText = findViewById(R.id.attendText);
+
+        classDur = current.getDoubleExtra(CLASS_DUR_ARG, 0);
+        record = current.getParcelableExtra(ATTENDANCE_ARG);
+        date = current.getStringExtra(DATE_ARG);
 
         setTitle(date);
 
-        final FirebaseFirestore database = FirebaseFirestore.getInstance();
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(firebaseUser == null)
-            return;
-        final String studentID = firebaseUser.getUid();
+        double studentDur = DBManager.getStudentDuration(record.getTimes());
+        String dur = String.valueOf(studentDur);
+        durationText.setText(dur + " minutes");
 
-        database.collection("attendance")
-                .whereEqualTo("studentID", studentID)
-                .whereEqualTo("classID", classID)
-                .whereEqualTo("date", date)
-                .limit(1)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                ArrayList<Map<String, String>> totalTime = (ArrayList<Map<String, String>>) document.get("times");
-                                long total = 0;
-                                ArrayList<String> timestamps = new ArrayList<>();
+        Double percentage = Double.valueOf(studentDur) / Double.valueOf(classDur) * 100;
+        DecimalFormat df = new DecimalFormat("#.##");
+        String percent = String.valueOf(df.format(percentage)) + " %";
 
-                                for(int i=0; i < totalTime.size(); i++) {
-                                    if(totalTime.get(i).get("timeIn") == null || totalTime.get(i).get("timeOut") == null) {
-                                        break;
-                                    }
-                                    SimpleDateFormat displayFormat = new SimpleDateFormat("hh:mm a");
-                                    SimpleDateFormat parseFormat = new SimpleDateFormat("HH:mm");
-                                    String timeIn = totalTime.get(i).get("timeIn");
-                                    String timeOut = totalTime.get(i).get("timeOut");
-                                    Log.d("timeIn", timeIn);
-                                    Log.d("timeOut", timeOut);
+        if(studentDur == 0)
+            attendText.setText(ABSENT);
+        else
+            attendText.setText(percent);
 
-                                    try {
-                                        // just changed military time to standard 12 hour format so its easier to read by user
-                                        timestamps.add("Time In: " + displayFormat.format(parseFormat.parse(timeIn)));
-                                        timestamps.add("Time Out: " + displayFormat.format(parseFormat.parse(timeOut)));
-                                    } catch (ParseException e) {
-                                        e.printStackTrace();
-                                    }
+        if(percentage < 25) {
+            attendText.setTextColor(Color.RED);
+        } else if ((25 <= percentage) && (percentage <= 75)) {
+            attendText.setTextColor(Color.parseColor(YELLOW));
+        } else {
+            attendText.setTextColor(Color.GREEN);
+        }
 
+        SimpleDateFormat displayFormat = new SimpleDateFormat("hh:mm a");
+        SimpleDateFormat parseFormat = new SimpleDateFormat("HH:mm");
 
-                                    SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-                                    Date in = null;
-                                    try {
-                                        in = format.parse(timeIn);
-                                    } catch (ParseException e) {
-                                        e.printStackTrace();
-                                    }
-                                    Date out = null;
-                                    try {
-                                        out = format.parse(timeOut);
-                                    } catch (ParseException e) {
-                                        e.printStackTrace();
-                                    }
+        ArrayList<Map<String, String>> times = record.getTimes();
+        ArrayList<String> timestamps = new ArrayList<>();
+        for(Map<String, String> time : times) {
+            if(time.get(DBManager.TIME_IN) == null || time.get(DBManager.TIME_OUT) == null)
+                break;
+            String timeIn = time.get(DBManager.TIME_IN);
+            String timeOut = time.get(DBManager.TIME_OUT);
+            try {
+                // just changed military time to standard 12 hour format so its easier to read by user
+                timestamps.add("Time In: " + displayFormat.format(parseFormat.parse(timeIn)));
+                timestamps.add("Time Out: " + displayFormat.format(parseFormat.parse(timeOut)));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
 
-                                    long difference = out.getTime() - in.getTime();
-                                    difference = difference/1000/60;
-                                    total = total + difference;
-                                }
-                                final long finalTotal = total;
-
-                                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                                        StudentMeetingActivity.this,
-                                        android.R.layout.simple_list_item_1,
-                                        timestamps);
-                                timeList.setAdapter(arrayAdapter);
-
-                                String dur = String.valueOf(total);
-                                durationText.setText(dur + " minutes");
-
-                                database.collection("classes").document(classID)
-                                        .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                        if (task.isSuccessful()) {
-                                            Map<String, String> durationMap = (Map<String, String>) task.getResult().get("duration");
-                                            assert durationMap != null;
-                                            String dayOfWeek = date.substring(0, 3);
-                                            Log.d ("Day", dayOfWeek);
-                                            String classDuration = durationMap.get(dayOfWeek);
-                                            Long classDur = Long.parseLong(classDuration);
-                                            Double percentage = Double.valueOf(finalTotal) / Double.valueOf(classDur) * 100;
-                                            Log.d ("Percent", String.valueOf(percentage) + " %");
-                                            DecimalFormat df = new DecimalFormat("#.##");
-                                            String percent = String.valueOf(df.format(percentage)) + " %";
-                                            if(percentage < 25) {
-                                                attendText.setText(percent);
-                                                attendText.setTextColor(Color.RED);
-                                            } else if ((25 <= percentage) && (percentage <= 75)) {
-                                                attendText.setText(percent);
-                                                attendText.setTextColor(Color.parseColor("#fcb603"));
-                                            } else {
-                                                attendText.setText(percent);
-                                                attendText.setTextColor(Color.GREEN);
-                                            }
-                                        } else {
-                                            Log.d("Database", "error getting duration");
-                                        }
-                                    }
-                                });
-                                if (total == 0) {
-                                    attendText.setText("Absent");
-                                    attendText.setTextColor(Color.RED);
-                                }
-
-                            }
-                        } else {
-                            Log.d("database", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+                StudentMeetingActivity.this,
+                android.R.layout.simple_list_item_1,
+                timestamps);
+        timeList.setAdapter(arrayAdapter);
     }
 }

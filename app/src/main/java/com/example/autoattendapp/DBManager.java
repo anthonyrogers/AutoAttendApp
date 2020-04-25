@@ -878,7 +878,50 @@ public class DBManager {
                 });
     }
 
+    public void getStudentRecord(final Handler handler, String classID, String studentID, String date) {
+        database.collection(DOC_ATTEND)
+                .whereEqualTo(DATE, date)
+                .whereEqualTo(CLASS_ID, classID)
+                .whereEqualTo(STUDENT_ID, studentID)
+                .limit(1)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        Message msg = Message.obtain();
+                        if(!task.isSuccessful()){
+                            msg.what = DB_ERROR;
+                            handler.sendMessage(msg);
+                            return;
+                        }
+                        for(QueryDocumentSnapshot document : task.getResult()) {
+                            String classID = (String) document.get(CLASS_ID);
+                            String date = (String) document.get(DATE);
+                            String firstName = (String) document.get(FIRST_NAME);
+                            String lastName = (String) document.get(LAST_NAME);
+                            String studentID = (String) document.get(STUDENT_ID);
+                            ArrayList<Map<String, String>> times = (ArrayList<Map<String, String>>) document.get(TIMES);
+                            AttendanceRecord record = new AttendanceRecord(classID, date, firstName, lastName, studentID, times);
+                            msg.what = DB_SUCCESS;
+                            msg.obj = record;
+                            handler.sendMessage(msg);
+                            return;
+                        }
+                        msg.what = DB_ERROR;
+                        handler.sendMessage(msg);
+                    }
+                });
+    }
 
+
+    /**
+     * This method gets the class duration for the specific day of week
+     * and sends it to a callback handler
+     *
+     * @param handler - the callback handler to send message
+     * @param classID - the ID of the class
+     * @param date - the date the class occurred
+     */
     public void getClassDuration(final Handler handler, final String classID, final String date) {
         database.collection(DOC_CLASSES).document(classID)
                 .get()
@@ -907,6 +950,12 @@ public class DBManager {
                 });
     }
 
+    /**
+     * This function calculates the total amount of time spent in a classroom
+     *
+     * @param totalTime - array of Map: timeIn: timeOut for a single attendance
+     * @return total: double - total amount of time student spent in class
+     */
     public static long getStudentDuration(ArrayList<Map<String, String>> totalTime) {
         long total = 0;
         for(int i=0; i < totalTime.size(); i++) {

@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.collect.Lists;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,13 +37,39 @@ public class DateListActivity extends AppCompatActivity implements DateRecyclerV
     List<String> classTimes;
     DBManager dbManager;
     private String date = null;
+    private double classDur;
+
+    private Handler onClassDurationReceived = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            if(msg.what == DBManager.DB_ERROR)
+                Toast.makeText(getApplicationContext(), "Failed to get class duration", Toast.LENGTH_LONG).show();
+            classDur = Double.valueOf((Long) msg.obj);
+            dbManager.getStudentRecord(onRecordReceived, classID, FirebaseAuth.getInstance().getCurrentUser().getUid(), date);
+            return false;
+        }
+    });
+
+    private Handler onRecordReceived = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            if(msg.what == DBManager.DB_ERROR)
+                Toast.makeText(getApplicationContext(), "Failed to get attendance record", Toast.LENGTH_LONG).show();
+            AttendanceRecord record = (AttendanceRecord) msg.obj;
+            Intent studentMeetingActivityIntent = new Intent(DateListActivity.this, StudentMeetingActivity.class);
+            studentMeetingActivityIntent.putExtra(StudentMeetingActivity.DATE_ARG, date);
+            studentMeetingActivityIntent.putExtra(StudentMeetingActivity.ATTENDANCE_ARG, record);
+            studentMeetingActivityIntent.putExtra(StudentMeetingActivity.CLASS_DUR_ARG, classDur);
+            startActivity(studentMeetingActivityIntent);
+            return false;
+        }
+    });
 
     private Handler onStudentsRecordsReceived = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
-            if(msg.what == DBManager.DB_ERROR) {
-                Toast.makeText(getApplicationContext(), "Failed to get attendance records", Toast.LENGTH_LONG);
-            }
+            if(msg.what == DBManager.DB_ERROR)
+                Toast.makeText(getApplicationContext(), "Failed to get attendance records", Toast.LENGTH_LONG).show();
             ArrayList<? extends Parcelable> attendanceRecords = (ArrayList<? extends Parcelable>) msg.obj;
             Intent studentListActivityIntent = new Intent(DateListActivity.this, StudentListActivity.class);
             studentListActivityIntent.putParcelableArrayListExtra(StudentListActivity.ATTENDANCE_ARG, attendanceRecords);
@@ -79,10 +106,9 @@ public class DateListActivity extends AppCompatActivity implements DateRecyclerV
     public void onItemClick(View view, int position) {
         Intent intent;
         if (userType.equals("Student")) {
-            intent = new Intent(DateListActivity.this, StudentMeetingActivity.class);
-            intent.putExtra("classID", classID);
-            intent.putExtra("date", classTimes.get(position));
-            startActivity(intent);
+            if(date != null) return;
+            dbManager.getClassDuration(onClassDurationReceived, classID, classTimes.get(position));
+            date = classTimes.get(position);
         } else {
             if(date != null) return;
             dbManager.getStudentsAttendance(onStudentsRecordsReceived, classID, classTimes.get(position));

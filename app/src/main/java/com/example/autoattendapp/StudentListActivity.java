@@ -9,13 +9,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentReference;
 
 import java.util.List;
 
-public class StudentListActivity extends AppCompatActivity {
+public class StudentListActivity extends AppCompatActivity implements StudentRecyclerViewAdapter.ItemClickListener {
 
     public static final String ATTENDANCE_ARG = "attendance";
     public static final String DATE = "date";
@@ -49,9 +50,6 @@ public class StudentListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_student_list);
         Intent current = getIntent();
         attendanceRecords = current.getParcelableArrayListExtra(ATTENDANCE_ARG);
-        for(AttendanceRecord record:attendanceRecords) {
-            System.out.println(String.join(" ", record.getFirstName(), record.getLastName()));
-        }
         date = current.getStringExtra(DATE);
         classID = current.getStringExtra(CLASS_ID);
         recyclerView = findViewById(R.id.studentRecyclerView);
@@ -60,8 +58,20 @@ public class StudentListActivity extends AppCompatActivity {
         dbManager.getClassDuration(receiveClassDuration, classID, date);
     }
 
+    // recycler view item click open the class
+    @Override
+    public void onItemClick(View view, int position) {
+        AttendanceRecord record = attendanceRecords.get(position);
+        Intent newIntent = new Intent(StudentListActivity.this, StudentMeetingActivity.class);
+        newIntent.putExtra(StudentMeetingActivity.CLASS_DUR_ARG, classDur);
+        newIntent.putExtra(StudentMeetingActivity.ATTENDANCE_ARG, record);
+        newIntent.putExtra(StudentMeetingActivity.DATE_ARG, date);
+        startActivity(newIntent);
+    }
+
     private void initRecyclerView(){
         adapter = new StudentRecyclerViewAdapter(getApplicationContext(), attendanceRecords, classDur);
+        adapter.setClickListener(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
