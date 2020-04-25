@@ -11,6 +11,7 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -61,8 +62,12 @@ public class StudentMeetingActivity extends AppCompatActivity {
         classDur = current.getDoubleExtra(CLASS_DUR_ARG, 0);
         record = current.getParcelableExtra(ATTENDANCE_ARG);
         date = current.getStringExtra(DATE_ARG);
-
+        if (record == null) {
+            Toast.makeText(getApplicationContext(), "Failed to get record of the sudent.", Toast.LENGTH_LONG).show();
+            return;
+        }
         setTitle(date);
+
 
         double studentDur = DBManager.getStudentDuration(record.getTimes());
         String dur = String.valueOf(studentDur);
