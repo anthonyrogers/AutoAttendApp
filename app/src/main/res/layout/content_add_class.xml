@@ -42,18 +42,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/etStartTime5"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="180dp"
-        android:layout_marginTop="292dp"
-        android:ems="10"
-        android:hint="Start Time"
-        android:inputType="time"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <TextView
         android:id="@+id/textViewStartDay"
         android:layout_width="wrap_content"
@@ -61,15 +49,6 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="400dp"
         android:text="Start day"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Spinner
-        android:id="@+id/spinWeekDay5"
-        android:layout_width="150dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="292dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -85,7 +64,7 @@
     <EditText
         android:id="@+id/etEndTime2"
         android:layout_width="100dp"
-        android:layout_height="40dp"
+        android:layout_height="0dp"
         android:layout_marginTop="156dp"
         android:layout_marginEnd="20dp"
         android:ems="10"
@@ -118,10 +97,10 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/etEndTime5"
+        android:id="@+id/etEndTime4"
         android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="292dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="244dp"
         android:layout_marginEnd="20dp"
         android:ems="10"
         android:hint="End Time"
@@ -130,21 +109,63 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/etEndTime4"
+        android:id="@+id/etStartTime4"
         android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="248dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="180dp"
+        android:layout_marginTop="244dp"
+        android:ems="10"
+        android:hint="Start Time"
+        android:inputType="time"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/etStartTime5"
+        android:layout_width="100dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="180dp"
+        android:layout_marginTop="288dp"
+        android:ems="10"
+        android:hint="Start Time"
+        android:inputType="time"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/etEndTime5"
+        android:layout_width="100dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="288dp"
         android:layout_marginEnd="20dp"
         android:ems="10"
         android:hint="End Time"
         android:inputType="time"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/spinWeekDay5"
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="288dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/spinWeekDay4"
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="244dp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/etEndTime3"
         android:layout_width="100dp"
-        android:layout_height="40dp"
+        android:layout_height="0dp"
         android:layout_marginTop="200dp"
         android:layout_marginEnd="20dp"
         android:ems="10"
@@ -177,7 +198,7 @@
     <EditText
         android:id="@+id/etStartTime3"
         android:layout_width="100dp"
-        android:layout_height="40dp"
+        android:layout_height="0dp"
         android:layout_marginStart="180dp"
         android:layout_marginTop="200dp"
         android:ems="10"
@@ -197,15 +218,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Spinner
-        android:id="@+id/spinWeekDay4"
-        android:layout_width="150dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="248dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <TextView
         android:id="@+id/textViewEndDay"
         android:layout_width="wrap_content"
@@ -219,21 +231,9 @@
     <EditText
         android:id="@+id/etStartTime2"
         android:layout_width="100dp"
-        android:layout_height="40dp"
+        android:layout_height="0dp"
         android:layout_marginStart="180dp"
         android:layout_marginTop="156dp"
-        android:ems="10"
-        android:hint="Start Time"
-        android:inputType="time"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/etStartTime4"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="180dp"
-        android:layout_marginTop="248dp"
         android:ems="10"
         android:hint="Start Time"
         android:inputType="time"
