@@ -169,6 +169,13 @@ public class CourseListActivity extends AppCompatActivity implements CourseRecyc
             db.getClassInfoById(this, id);
             Log.d("course list ==>", "class id: "+ id);
         }
+        /*
+         * fixed bug: cannot refresh list when removing the last one class
+         */
+        if(classlist.size()==0){
+            mClassQueue.clear();
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     // return class info from DBManager
