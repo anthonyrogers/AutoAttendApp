@@ -7,6 +7,8 @@ import android.view.ViewParent;
 
 import androidx.test.espresso.DataInteraction;
 import androidx.test.espresso.ViewInteraction;
+import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.rule.GrantPermissionRule;
@@ -19,12 +21,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Random;
+
 import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
+import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
@@ -38,6 +43,29 @@ import static org.hamcrest.Matchers.is;
 @RunWith(AndroidJUnit4.class)
 public class AddClassActivityTest {
 
+    private String POPUP_WINDOW_BACKGROUND_VIEW = "android.widget.PopupWindow$PopupBackgroundView";
+    private String SCROLL_VIEW = "android.widget.ScrollView";
+    private String OK_DIALOGUE = "OK";
+
+    private String TEST_LOGIN_USER = "temple@temple.edu";
+    private String TEST_LOGIN_PASS = "password";
+    private String COURSE_NAME = getRandomName();
+    private String LOCATION = getRandomName();
+    private String START_TIME = "10:00 AM";
+    private String END_TIME = "11:50 AM";
+
+    protected String getRandomName() {
+        String SALTCHARS = "abcdefghijklmnopqrstuvwxyz 0123456";
+        StringBuilder salt = new StringBuilder();
+        Random rnd = new Random();
+        while (salt.length() < 6) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+            salt.append(SALTCHARS.charAt(index));
+        }
+        String saltStr = salt.toString();
+        return saltStr;
+    }
+
     @Rule
     public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
 
@@ -48,65 +76,30 @@ public class AddClassActivityTest {
 
     @Test
     public void addClassActivityTest() {
-        ViewInteraction appCompatEditText = onView(
-                allOf(withId(R.id.emailTxtBox),
-                        childAtPosition(
-                                childAtPosition(
-                                        withClassName(is("android.widget.LinearLayout")),
-                                        2),
-                                1),
-                        isDisplayed()));
-        appCompatEditText.perform(replaceText("temple@temple.edu"), closeSoftKeyboard());
 
-        ViewInteraction appCompatEditText2 = onView(
-                allOf(withId(R.id.passwordTxtBox),
-                        childAtPosition(
-                                childAtPosition(
-                                        withClassName(is("android.widget.LinearLayout")),
-                                        3),
-                                1),
-                        isDisplayed()));
-        appCompatEditText2.perform(replaceText("password"), closeSoftKeyboard());
+        onView(ViewMatchers.withId(R.id.emailTxtBox))
+                .perform(ViewActions.clearText())
+                .perform(ViewActions.typeText(TEST_LOGIN_USER), ViewActions.closeSoftKeyboard());
 
-        ViewInteraction appCompatButton = onView(
-                allOf(withId(R.id.loginButton), withText("Login"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withClassName(is("android.widget.LinearLayout")),
-                                        4),
-                                4),
-                        isDisplayed()));
-        appCompatButton.perform(click());
+        onView(ViewMatchers.withId(R.id.passwordTxtBox))
+                .perform(ViewActions.clearText())
+                .perform(ViewActions.typeText(TEST_LOGIN_PASS), ViewActions.closeSoftKeyboard());
 
-        ViewInteraction appCompatButton2 = onView(
-                allOf(withId(R.id.buttonAddCourse), withText("Add Class"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withClassName(is("android.widget.LinearLayout")),
-                                        1),
-                                0),
-                        isDisplayed()));
-        appCompatButton2.perform(click());
+        onView(ViewMatchers.withId(R.id.loginButton))
+                .perform(ViewActions.click());
 
-        ViewInteraction appCompatEditText3 = onView(
-                allOf(withId(R.id.editTextCourse),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(android.R.id.content),
-                                        0),
-                                0),
-                        isDisplayed()));
-        appCompatEditText3.perform(replaceText("placeholder"), closeSoftKeyboard());
+        try {
+            Thread.sleep(3000L);
+        } catch (InterruptedException e){}
 
-        ViewInteraction appCompatEditText4 = onView(
-                allOf(withId(R.id.editTextLocation),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(android.R.id.content),
-                                        0),
-                                1),
-                        isDisplayed()));
-        appCompatEditText4.perform(replaceText("SERC 206"), closeSoftKeyboard());
+        onView(ViewMatchers.withId(R.id.buttonAddCourse))
+                .perform(ViewActions.click());
+
+        onView(ViewMatchers.withId(R.id.editTextCourse))
+                .perform(replaceText(COURSE_NAME), ViewActions.closeSoftKeyboard());
+
+        onView(ViewMatchers.withId(R.id.editTextLocation))
+                .perform(replaceText(LOCATION), ViewActions.closeSoftKeyboard());
 
         ViewInteraction appCompatSpinner = onView(
                 allOf(withId(R.id.spinWeekDay1),
@@ -120,7 +113,7 @@ public class AddClassActivityTest {
 
         DataInteraction checkedTextView = onData(anything())
                 .inAdapterView(childAtPosition(
-                        withClassName(is("android.widget.PopupWindow$PopupBackgroundView")),
+                        withClassName(is(POPUP_WINDOW_BACKGROUND_VIEW)),
                         0))
                 .atPosition(1);
         checkedTextView.perform(click());
@@ -137,7 +130,7 @@ public class AddClassActivityTest {
 
         DataInteraction checkedTextView2 = onData(anything())
                 .inAdapterView(childAtPosition(
-                        withClassName(is("android.widget.PopupWindow$PopupBackgroundView")),
+                        withClassName(is(POPUP_WINDOW_BACKGROUND_VIEW)),
                         0))
                 .atPosition(3);
         checkedTextView2.perform(click());
@@ -154,7 +147,7 @@ public class AddClassActivityTest {
 
         DataInteraction checkedTextView3 = onData(anything())
                 .inAdapterView(childAtPosition(
-                        withClassName(is("android.widget.PopupWindow$PopupBackgroundView")),
+                        withClassName(is(POPUP_WINDOW_BACKGROUND_VIEW)),
                         0))
                 .atPosition(5);
         checkedTextView3.perform(click());
@@ -167,13 +160,13 @@ public class AddClassActivityTest {
                                         0),
                                 15),
                         isDisplayed()));
-        appCompatEditText5.perform(click());
+        appCompatEditText5.perform(typeText(START_TIME));
 
         ViewInteraction appCompatButton3 = onView(
-                allOf(withId(android.R.id.button1), withText("OK"),
+                allOf(withId(android.R.id.button1), withText(OK_DIALOGUE),
                         childAtPosition(
                                 childAtPosition(
-                                        withClassName(is("android.widget.ScrollView")),
+                                        withClassName(is(SCROLL_VIEW)),
                                         0),
                                 3)));
         appCompatButton3.perform(scrollTo(), click());
@@ -186,13 +179,13 @@ public class AddClassActivityTest {
                                         0),
                                 6),
                         isDisplayed()));
-        appCompatEditText6.perform(click());
+        appCompatEditText6.perform(typeText(END_TIME));
 
         ViewInteraction appCompatButton4 = onView(
-                allOf(withId(android.R.id.button1), withText("OK"),
+                allOf(withId(android.R.id.button1), withText(OK_DIALOGUE),
                         childAtPosition(
                                 childAtPosition(
-                                        withClassName(is("android.widget.ScrollView")),
+                                        withClassName(is(SCROLL_VIEW)),
                                         0),
                                 3)));
         appCompatButton4.perform(scrollTo(), click());
@@ -205,13 +198,13 @@ public class AddClassActivityTest {
                                         0),
                                 20),
                         isDisplayed()));
-        appCompatEditText7.perform(click());
+        appCompatEditText7.perform(typeText(START_TIME));
 
         ViewInteraction appCompatButton5 = onView(
-                allOf(withId(android.R.id.button1), withText("OK"),
+                allOf(withId(android.R.id.button1), withText(OK_DIALOGUE),
                         childAtPosition(
                                 childAtPosition(
-                                        withClassName(is("android.widget.ScrollView")),
+                                        withClassName(is(SCROLL_VIEW)),
                                         0),
                                 3)));
         appCompatButton5.perform(scrollTo(), click());
@@ -224,13 +217,13 @@ public class AddClassActivityTest {
                                         0),
                                 5),
                         isDisplayed()));
-        appCompatEditText8.perform(click());
+        appCompatEditText8.perform(typeText(END_TIME));
 
         ViewInteraction appCompatButton6 = onView(
-                allOf(withId(android.R.id.button1), withText("OK"),
+                allOf(withId(android.R.id.button1), withText(OK_DIALOGUE),
                         childAtPosition(
                                 childAtPosition(
-                                        withClassName(is("android.widget.ScrollView")),
+                                        withClassName(is(SCROLL_VIEW)),
                                         0),
                                 3)));
         appCompatButton6.perform(scrollTo(), click());
@@ -243,13 +236,13 @@ public class AddClassActivityTest {
                                         0),
                                 17),
                         isDisplayed()));
-        appCompatEditText9.perform(click());
+        appCompatEditText9.perform(typeText(START_TIME));
 
         ViewInteraction appCompatButton7 = onView(
-                allOf(withId(android.R.id.button1), withText("OK"),
+                allOf(withId(android.R.id.button1), withText(OK_DIALOGUE),
                         childAtPosition(
                                 childAtPosition(
-                                        withClassName(is("android.widget.ScrollView")),
+                                        withClassName(is(SCROLL_VIEW)),
                                         0),
                                 3)));
         appCompatButton7.perform(scrollTo(), click());
@@ -262,13 +255,13 @@ public class AddClassActivityTest {
                                         0),
                                 14),
                         isDisplayed()));
-        appCompatEditText10.perform(click());
+        appCompatEditText10.perform(typeText(END_TIME));
 
         ViewInteraction appCompatButton8 = onView(
-                allOf(withId(android.R.id.button1), withText("OK"),
+                allOf(withId(android.R.id.button1), withText(OK_DIALOGUE),
                         childAtPosition(
                                 childAtPosition(
-                                        withClassName(is("android.widget.ScrollView")),
+                                        withClassName(is(SCROLL_VIEW)),
                                         0),
                                 3)));
         appCompatButton8.perform(scrollTo(), click());
@@ -284,10 +277,10 @@ public class AddClassActivityTest {
         appCompatEditText11.perform(click());
 
         ViewInteraction appCompatButton9 = onView(
-                allOf(withId(android.R.id.button1), withText("OK"),
+                allOf(withId(android.R.id.button1), withText(OK_DIALOGUE),
                         childAtPosition(
                                 childAtPosition(
-                                        withClassName(is("android.widget.ScrollView")),
+                                        withClassName(is(SCROLL_VIEW)),
                                         0),
                                 3)));
         appCompatButton9.perform(scrollTo(), click());
@@ -313,7 +306,7 @@ public class AddClassActivityTest {
         appCompatImageButton.perform(scrollTo(), click());
 
         ViewInteraction appCompatButton10 = onView(
-                allOf(withId(android.R.id.button1), withText("OK"),
+                allOf(withId(android.R.id.button1), withText(OK_DIALOGUE),
                         childAtPosition(
                                 childAtPosition(
                                         withClassName(is("android.widget.ScrollView")),

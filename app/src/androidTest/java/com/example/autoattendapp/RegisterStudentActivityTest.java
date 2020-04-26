@@ -40,7 +40,6 @@ public class RegisterStudentActivityTest {
         }
         String saltStr = salt.toString();
         return saltStr;
-
     }
 
     @Rule
