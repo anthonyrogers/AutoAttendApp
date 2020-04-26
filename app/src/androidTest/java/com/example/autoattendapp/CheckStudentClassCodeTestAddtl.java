@@ -14,7 +14,6 @@ import androidx.test.runner.AndroidJUnit4;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,9 +21,7 @@ import org.junit.runner.RunWith;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
-import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.replaceText;
-import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
@@ -34,7 +31,7 @@ import static org.hamcrest.Matchers.is;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class CheckStudentClassCode {
+public class CheckStudentClassCodeTestAddtl {
 
     @Rule
     public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
@@ -45,7 +42,7 @@ public class CheckStudentClassCode {
                     "android.permission.ACCESS_COARSE_LOCATION");
 
     @Test
-    public void checkStudentClassCode() {
+    public void checkStudentClassCodeTestAddtl() {
         ViewInteraction appCompatEditText = onView(
                 allOf(withId(R.id.emailTxtBox),
                         childAtPosition(
@@ -66,16 +63,6 @@ public class CheckStudentClassCode {
                         isDisplayed()));
         appCompatEditText2.perform(replaceText("password"), closeSoftKeyboard());
 
-        ViewInteraction appCompatEditText3 = onView(
-                allOf(withId(R.id.passwordTxtBox), withText("password"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withClassName(is("android.widget.LinearLayout")),
-                                        3),
-                                1),
-                        isDisplayed()));
-        appCompatEditText3.perform(pressImeActionButton());
-
         ViewInteraction appCompatButton = onView(
                 allOf(withId(R.id.loginButton), withText("Login"),
                         childAtPosition(
@@ -86,31 +73,11 @@ public class CheckStudentClassCode {
                         isDisplayed()));
         appCompatButton.perform(click());
 
-        // Added a sleep statement to match the app's execution delay.
-        // The recommended way to handle such scenarios is to use Espresso idling resources:
-        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
         try {
             Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        /*
-        ViewInteraction relativeLayout = onView(
-                allOf(childAtPosition(
-                        childAtPosition(
-                                withId(R.id.recyclerView),
-                                0),
-                        0),
-                        isDisplayed()));
-        relativeLayout.check(matches(isDisplayed()));
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
-
 
         ViewInteraction appCompatTextView = onView(
                 allOf(withId(R.id.tvDeviceInfo), withText("⋮"),
@@ -122,61 +89,15 @@ public class CheckStudentClassCode {
                         isDisplayed()));
         appCompatTextView.perform(click());
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
-
-        ViewInteraction textView = onView(
-                allOf(withId(android.R.id.title), withText("View Code"),
-                        childAtPosition(
-                                childAtPosition(
-                                        IsInstanceOf.<View>instanceOf(android.widget.LinearLayout.class),
-                                        0),
-                                0),
-                        isDisplayed()));
-        textView.check(matches(isDisplayed()));
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
-        ViewInteraction textView2 = onView(
-                allOf(withId(android.R.id.title), withText("Modify"),
-                        childAtPosition(
-                                childAtPosition(
-                                        IsInstanceOf.<View>instanceOf(android.widget.LinearLayout.class),
-                                        0),
-                                0),
-                        isDisplayed()));
-        textView2.check(matches(isDisplayed()));
-
-        ViewInteraction textView3 = onView(
-                allOf(withId(android.R.id.title), withText("Remove"),
-                        childAtPosition(
-                                childAtPosition(
-                                        IsInstanceOf.<View>instanceOf(android.widget.LinearLayout.class),
-                                        0),
-                                0),
-                        isDisplayed()));
-        textView3.check(matches(isDisplayed()));
-
         ViewInteraction appCompatTextView2 = onView(
                 allOf(withId(android.R.id.title), withText("View Code"),
                         childAtPosition(
                                 childAtPosition(
-                                        withClassName(is("com.android.internal.view.menu.ListMenuItemView")),
+                                        withId(android.R.id.content),
                                         0),
                                 0),
                         isDisplayed()));
         appCompatTextView2.perform(click());
-
-
     }
 
     private static Matcher<View> childAtPosition(
