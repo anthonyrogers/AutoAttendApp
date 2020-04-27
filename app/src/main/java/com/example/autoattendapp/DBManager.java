@@ -293,7 +293,7 @@ public class DBManager {
                             now.set(Calendar.SECOND, 0);
                             now.set(Calendar.MILLISECOND, 0);
                             now.set(Calendar.DAY_OF_WEEK, Calendar.DAY_OF_WEEK);
-                           Log.i("CALENDAR DAY OF WEEK =====> ", Calendar.DAY_OF_WEEK + ""); */
+                         */
                             Calendar c = Calendar.getInstance();
                             int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
                             Log.i("CALENDAR DAY OF WEEK =====> ", dayOfWeek + "");

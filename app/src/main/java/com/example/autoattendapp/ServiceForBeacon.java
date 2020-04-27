@@ -392,6 +392,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
         if(verifiedBeacon) {
             sessionTime = new HashMap<>();
             sessionTime.put("timeIn", getCurrentTime());
+            updateNotification(ACTIVE_TITLE + className, ACTIVE_CONTENT );
             Log.i("BEACON ====>", "ENTERED REGION" + getCurrentTime());
         }
     }
@@ -401,6 +402,7 @@ public class ServiceForBeacon extends Service implements RangeNotifier, BeaconCo
         if(verifiedBeacon) {
            sessionTime.put("timeOut", getCurrentTime());
            totalTime.add(sessionTime);
+            updateNotification("Searching for class beacon", "Notification will update when you're in class" );
             Log.i("BEACON ====>", "EXITED REGION" + getCurrentTime());
         }
     }
