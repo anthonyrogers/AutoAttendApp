@@ -155,14 +155,14 @@ public class AddClassContent extends AppCompatActivity implements View.OnClickLi
 
         List<String> list = new ArrayList<String>();
         list.add("");
+        list.add(MeetingOfClass.SUNDAY);
         list.add(MeetingOfClass.MONDAY);
         list.add(MeetingOfClass.TUESDAY);
         list.add(MeetingOfClass.WEDNESDAY);
         list.add(MeetingOfClass.THURSDAY);
         list.add(MeetingOfClass.FRIDAY);
         list.add(MeetingOfClass.SATURDAY);
-        list.add(MeetingOfClass.SUNDAY);
-
+        
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getApplicationContext(),
                 android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
