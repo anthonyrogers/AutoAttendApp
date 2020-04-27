@@ -128,8 +128,6 @@ public class CheckStudentClassCode {
             e.printStackTrace();
         }
 
-
-
         ViewInteraction textView = onView(
                 allOf(withId(android.R.id.title), withText("View Code"),
                         childAtPosition(
@@ -144,7 +142,6 @@ public class CheckStudentClassCode {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
 
         ViewInteraction textView2 = onView(
                 allOf(withId(android.R.id.title), withText("Modify"),
@@ -175,8 +172,6 @@ public class CheckStudentClassCode {
                                 0),
                         isDisplayed()));
         appCompatTextView2.perform(click());
-
-
     }
 
     private static Matcher<View> childAtPosition(
